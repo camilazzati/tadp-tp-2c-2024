@@ -1,9 +1,17 @@
-describe Prueba do
-  let(:prueba) { Prueba.new }
+require 'rspec'
+require_relative '../lib/tadspec/tad_spec'
 
-  describe '#materia' do
-    it 'debería pasar este test' do
-      expect(prueba.materia).to be :tadp
-    end
+describe "tadspec" do
+
+  it "Objeto entiende Deberia" do
+    expect(Object.new.respond_to? :deberia).to be(true)
+  end
+
+  it "Numero entiende Deberia" do
+    expect(7.respond_to? :deberia).to be(true)
+  end
+
+  it "String entiende Deberia" do
+    expect("Soy un String".respond_to? :deberia). to be(true)
   end
 end
