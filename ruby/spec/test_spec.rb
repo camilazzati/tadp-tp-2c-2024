@@ -1,6 +1,5 @@
 describe "tadspec" do
-
-  it "Objeto entiende Deberia" do
+  it "Objeto entiende Deberia y sus mensajes " do
     expect(Object.new.respond_to? :deberia).to be(true)
   end
 

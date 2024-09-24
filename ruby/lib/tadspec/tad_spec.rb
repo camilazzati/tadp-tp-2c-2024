@@ -10,6 +10,23 @@ module Criteria
       @proc.call(object)
     end
   end
+
+  def igual_a(algo)
+    Config.new(proc { |object| object == algo })
+  end
+
+  def distinto_a(algo)
+    Config.new(proc {|object| object != algo})
+  end
+
+  def mayor_a(algo)
+    Config.new(proc {|object| object > algo})
+  end
+
+  def menor_a(algo)
+    Config.new(proc {|object| object < algo})
+  end
+
 end
 
 class Object
