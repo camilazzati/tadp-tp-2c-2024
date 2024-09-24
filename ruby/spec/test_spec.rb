@@ -1,6 +1,3 @@
-require 'rspec'
-require_relative '../lib/tadspec/tad_spec'
-
 describe "tadspec" do
 
   it "Objeto entiende Deberia" do
