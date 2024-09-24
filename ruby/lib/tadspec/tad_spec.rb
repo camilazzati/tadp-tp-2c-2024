@@ -41,6 +41,8 @@ end
 #Creamos nuestro propio Error al fallar
 class TadspecAssertionError < StandardError
 
+end
+
 #Abro la clase Object para inyectarle el mensaje deberia
 class Object
   def deberia(criteria)
@@ -48,5 +50,6 @@ class Object
     unless criteria.call(self)
       raise TadspecAssertionError
     end
+    criteria.call(self)
   end
 end
