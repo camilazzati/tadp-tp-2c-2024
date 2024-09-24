@@ -29,18 +29,24 @@ module Criteria
 
   def ser(config)
     #Si no es un config, comparo por igual
-    unless config.is_a? Config
-      igual_a(config)
-    else
+    if config.is_a? Config
       config #Se ejectua el proc
+    else
+      igual_a(config)
     end
   end
 
 end
 
+#Creamos nuestro propio Error al fallar
+class TadspecAssertionError < StandardError
+
 #Abro la clase Object para inyectarle el mensaje deberia
 class Object
   def deberia(criteria)
-    criteria.call(self)
+    #Si no puede hacer el call, explota
+    unless criteria.call(self)
+      raise TadspecAssertionError
+    end
   end
 end
