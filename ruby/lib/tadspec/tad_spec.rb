@@ -27,6 +27,12 @@ module Criteria
     Config.new(proc {|object| object < algo})
   end
 
+  def uno_de_estos(*cosas)
+    cosas = cosas.first if cosas.first.is_a?(Array)
+    Config.new(proc { |object| cosas.include? object })
+  end
+
+
   def ser(config)
     #Si no es un config, comparo por igual
     if config.is_a? Config
