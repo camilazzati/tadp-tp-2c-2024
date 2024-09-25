@@ -28,10 +28,11 @@ module Criteria
   end
 
   def uno_de_estos(*cosas)
+    # *cosas captura todos los argumentos pasados al mensaje
+    # si es un array lo trata como tal y si es una lista de argumentos tambien
     cosas = cosas.first if cosas.first.is_a?(Array)
     Config.new(proc { |object| cosas.include? object })
   end
-
 
   def ser(config)
     #Si no es un config, comparo por igual
@@ -44,7 +45,7 @@ module Criteria
 
 end
 
-#Creamos nuestro propio Error al fallar
+#Creamos nuestro propio Error para las aserciones
 class TadspecAssertionError < StandardError
 
 end
@@ -54,6 +55,8 @@ class Object
   def deberia(criteria)
     #Si no puede hacer el call, explota
     unless criteria.call(self)
+      # Esto lo dejo momentaneamente asi para incorporar esta funcionalidad, pero capaz estaria bueno poder retonar
+      # el valor false cuando falla la comparacion
       raise TadspecAssertionError
     end
     criteria.call(self)
