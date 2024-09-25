@@ -29,8 +29,16 @@ describe "mensaje_ser" do
     expect(true.deberia ser igual_a true).to be(true)
   end
 
-  it "Comparo con menaje Ser" do
+  it "Comparo con mensaje Ser" do
     expect(false.deberia ser false).to be(true)
+  end
+
+  it "Busco en una lista una coincidencia" do
+    expect(7.deberia ser uno_de_estos [5, 7, "tadp"]).to be(true)
+  end
+
+  it "Busco en muchos parametros una coincidencia" do
+    expect(7.deberia ser uno_de_estos 5, 7, "tadp").to be(true)
   end
 
   it "Mensaje Ser explota" do
