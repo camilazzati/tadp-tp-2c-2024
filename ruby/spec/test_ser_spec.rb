@@ -77,8 +77,6 @@ describe "mensaje_ser" do
     mirtha = Persona.new("Mirtha", 97)
     expect(persona_vieja.edad.deberia ser menor_a mirtha.edad).to be(true)
   end
-
-
 end
 
 
