@@ -10,4 +10,8 @@ describe "tadspec" do
   it "String entiende Deberia" do
     expect("Soy un String".respond_to? :deberia). to be(true)
   end
+
+  it "Persona entiende Deberia" do
+    expect(Persona.new('Pepe', 25).respond_to? :deberia).to be(true)
+  end
 end
