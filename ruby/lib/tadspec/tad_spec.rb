@@ -53,12 +53,9 @@ end
 #Abro la clase Object para inyectarle el mensaje deberia
 class Object
   def deberia(criteria)
+    respuesta_criteria = criteria.call(self)
     #Si no puede hacer el call, explota
-    unless criteria.call(self)
-      # Esto lo dejo momentaneamente asi para incorporar esta funcionalidad, pero capaz estaria bueno poder retonar
-      # el valor false cuando falla la comparacion
-      raise TadspecAssertionError
-    end
-    criteria.call(self)
+    raise TadspecAssertionError unless respuesta_criteria
+    respuesta_criteria
   end
 end
