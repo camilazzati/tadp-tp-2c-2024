@@ -69,7 +69,7 @@ describe "mensaje_ser" do
     expect(persona_vieja.edad.deberia ser 35).to be(true)
   end
 
-  it 'Persona joven es mayor de edad pero menor que adulto mayor' do
+  it 'Persona joven es mayor de edad' do
     expect(persona_joven.edad.deberia ser mayor_a 18).to be(true)
   end
 
