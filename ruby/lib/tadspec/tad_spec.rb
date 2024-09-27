@@ -43,6 +43,10 @@ module Criteria
     end
   end
 
+  def no( criteria )
+    proc { | object | !criteria.call(object) }
+  end
+
 end
 
 #Creamos nuestro propio Error para las aserciones
