@@ -53,7 +53,7 @@ module Criteria
       end
 
       # si lo entiende retorna true,
-      true
+      entiende
     })
   end
 
