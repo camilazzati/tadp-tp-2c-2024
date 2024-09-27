@@ -43,6 +43,10 @@ module Criteria
     end
   end
 
+  def no( criteria )
+    proc { | object | !criteria.call(object) }
+  end
+
   def entender(mensaje)
     Config.new(proc { |object|
       entiende = object.respond_to?(mensaje, true)
