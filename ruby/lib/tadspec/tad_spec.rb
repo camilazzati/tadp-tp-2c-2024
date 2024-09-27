@@ -47,10 +47,58 @@ module Criteria
     proc { | object | !criteria.call(object) }
   end
 
+  def entender(mensaje)
+    Config.new(proc { |object|
+      entiende = object.respond_to?(mensaje, true)
+
+      # si el objeto no entiende el mensaje, tira error
+      unless entiende
+        raise EntenderError, "El objeto #{object} no entiende el mensaje :#{mensaje}"
+      end
+
+      # si lo entiende retorna true,
+      entiende
+    })
+  end
+
+
+  def en(&bloque)
+    bloque
+  end
+
+  def explotar_con(error_esperado)
+    Config.new(proc { |object|
+      begin
+        object.call
+
+        # si no tira error => falla
+        raise WrongError, "Se esperaba que explote con #{error_esperado}, pero no exploto "
+
+      rescue Exception => error_obtenido
+        # si el error es el esperado => pasa
+        if error_obtenido.is_a?(error_esperado)
+          true
+        else # si tira error pero no es el esperado => falla
+          raise WrongError, "Se esperaba que explote con #{error_esperado}, pero exploto con #{error_obtenido.class}"
+        end
+
+      end
+
+    })
+  end
+
 end
 
 #Creamos nuestro propio Error para las aserciones
 class TadspecAssertionError < StandardError
+
+end
+
+class EntenderError < StandardError
+
+end
+
+class WrongError < StandardError
 
 end
 
