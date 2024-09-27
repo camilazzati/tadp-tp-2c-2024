@@ -43,6 +43,21 @@ module Criteria
     end
   end
 
+  def entender(mensaje)
+    Config.new(proc { |object|
+      entiende = object.respond_to?(mensaje, true)
+
+      # si el objeto no entiende el mensaje, tira error
+      unless entiende
+        raise EntenderError, "El objeto #{object} no entiende el mensaje :#{mensaje}"
+      end
+
+      # si lo entiende retorna true,
+      entiende
+    })
+  end
+
+
   def en(&bloque)
     bloque
   end
@@ -72,6 +87,10 @@ end
 
 #Creamos nuestro propio Error para las aserciones
 class TadspecAssertionError < StandardError
+
+end
+
+class EntenderError < StandardError
 
 end
 
