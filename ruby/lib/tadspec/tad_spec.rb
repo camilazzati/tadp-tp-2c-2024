@@ -140,7 +140,7 @@ module Criteria
     end
   end
 
-  def respond_to_missing?(mensaje)
+  def respond_to_missing?(mensaje, include_private = false)
     mensaje.to_s.start_with?('tener_') || mensaje.to_s.start_with?('ser_') || super
   end
 end
@@ -167,7 +167,7 @@ class NoMethodError
   end
 end
 
-#Abro la clase Object para inyectarle el mensaje deberia
+# Abro la clase Object para inyectarle el mensaje deberia
 class Object
   def deberia(criteria)
     respuesta_criteria = criteria.call(self)
@@ -176,3 +176,83 @@ class Object
     respuesta_criteria
   end
 end
+
+module TADsPec
+  # Se guardan todos los suites
+  @suites = []
+
+  # Mensaje para registrar una suite de tests
+  def self.registrar_suite(suite_class)
+    @suites << suite_class
+
+  end
+
+  def self.ver_suites
+    @suites
+  end
+
+  # Mensaje para obtener todos los tests de una suite
+  def self.tests_de(suite_class)
+    # Me fijo en sus metodos de instancia, primero verifico que tenga aridad 0 y despues que empiece con testear_que_
+    suite_class.instance_methods.select do |method|
+      suite_class.instance_method(method).arity == 0 && method.to_s.start_with?("testear_que_")
+    end
+  end
+
+  # Mensaje para correr todos los tests de una suite o tests específicos
+  def self.testear(suite_class = nil, *test_names)
+    # Si el suite_class es null, se debe ejecutar todos los suites
+    if suite_class.nil?
+      testear_todas_las_suites
+    else
+      testear_suite(suite_class, *test_names)
+    end
+  end
+
+  # Mensaje para correr todas las suites guardadas
+  def self.testear_todas_las_suites
+    @suites.each do |suite|
+      testear_suite(suite)
+    end
+  end
+
+  # Mensaje para correr una suite específica con tests específicos (si se pasan)
+  def self.testear_suite(suite_class, *test_names)
+    suite = suite_class.new
+    tests = test_names.empty? ? tests_de(suite_class) : test_names.map { |name| "testear_que_#{name}".to_sym }
+
+    resultados = { total: 0, pasados: 0, fallidos: 0, explotados: 0, detalles: [] }
+
+    tests.each do |test|
+      resultados[:total] += 1
+      begin
+        suite.send(test)
+        resultados[:pasados] += 1
+        resultados[:detalles] << "✅ #{test} pasó correctamente."
+      rescue StandardError => e
+        resultados[:explotados] += 1
+        resultados[:detalles] << "💥 #{test} explotó con error: #{e.message}\n#{e.backtrace.join("\n")}"
+      rescue TadspecAssertionError => e
+        resultados[:fallidos] += 1
+        resultados[:detalles] << "❌ #{test} falló: #{e.message}"
+      end
+    end
+
+    mostrar_resultados(resultados)
+  end
+
+  private
+
+  # Mensaje para mostrar resultados en consola
+  def self.mostrar_resultados(resultados)
+    puts "Tests corridos: #{resultados[:total]}"
+    puts "Pasados: #{resultados[:pasados]}"
+    puts "Fallidos: #{resultados[:fallidos]}"
+    puts "Explotados: #{resultados[:explotados]}"
+    puts "\nDetalles:"
+    resultados[:detalles].each { |detalle| puts detalle }
+  end
+end
+
+
+
