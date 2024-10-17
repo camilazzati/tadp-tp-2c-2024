@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 require_relative '../resultado'
+require_relative '../suites/suite'
 
 
 module Criteria
@@ -195,12 +196,12 @@ module TADsPec
   end
 
   # Mensaje para obtener todos los tests de una suite
-  def self.tests_de(suite_class)
+  # def self.tests_de(suite_class)
     # Me fijo en sus metodos de instancia, primero verifico que tenga aridad 0 y despues que empiece con testear_que_
-    suite_class.instance_methods.select do |method|
-      suite_class.instance_method(method).arity == 0 && method.to_s.start_with?("testear_que_")
-    end
-  end
+  # suite_class.instance_methods.select do |method|
+  #   suite_class.instance_method(method).arity == 0 && method.to_s.start_with?("testear_que_")
+  #  end
+  #end
 
   # Mensaje para correr todos los tests de una suite o tests específicos
   def self.testear(suite_class = nil, *test_names)
@@ -209,7 +210,8 @@ module TADsPec
     if suite_class.nil?
       testear_todas_las_suites
     else
-      resultado_suite = testear_suite(suite_class,*test_names)
+      #resultado_suite = testear_suite(suite_class,*test_names)
+      resultado_suite = suite_class.testear(*test_names)
       resultado_suite.mostrar_resultados
     end
   end
@@ -218,31 +220,34 @@ module TADsPec
   def self.testear_todas_las_suites
     resultados_totales = ResultadoTotal.new
     @suites.each do |suite|
-      resultado_suite = testear_suite(suite)
+      #resultado_suite = testear_suite(suite)
+      resultado_suite = suite.testear
       resultados_totales.agregar_resultado_suite(resultado_suite)
     end
     resultados_totales.mostrar_resultado_total
   end
 
   # Mensaje para correr una suite específica con tests específicos (si se pasan)
-  def self.testear_suite(suite_class, *test_names)
-    suite = suite_class.new
-    tests = test_names.empty? ? tests_de(suite_class) : test_names.map { |name| "testear_que_#{name}".to_sym }
+  #def self.testear_suite(suite_class, *test_names)
+  #  suite = suite_class.new
+  #  tests = test_names.empty? ? tests_de(suite_class) : test_names.map { |name| "testear_que_#{name}".to_sym }
 
-    resultado_suite = ResultadoSuite.new(suite)
-    tests.each do |test|
-      begin
-        suite.send(test)
-        resultado_suite.agregar_resultado(ResultadoExitoso.new(test))
-      rescue TadspecAssertionError => e
-        resultado_suite.agregar_resultado(ResultadoFallido.new(test, e))
-      rescue StandardError => e
-        resultado_suite.agregar_resultado(ResultadoExplotado.new(test, e))
+  #    resultado_suite = ResultadoSuite.new(suite)
+  # tests.each do |test|
+  #   begin
+  #     suite.send(test)
+  #     resultado_suite.agregar_resultado(ResultadoExitoso.new(test))
+  #   rescue TadspecAssertionError => e
+  #     resultado_suite.agregar_resultado(ResultadoFallido.new(test, e))
+  #   rescue StandardError => e
+  #     resultado_suite.agregar_resultado(ResultadoExplotado.new(test, e))
+  #
+  #   end
+  # end
+  # resultado_suite #devuelve
 
-      end
-    end
-    resultado_suite #devuelve
-  end
+#end
+
 end
 
 
