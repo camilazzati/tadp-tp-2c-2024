@@ -1,4 +1,6 @@
 # frozen_string_literal: true
+require_relative '../resultado'
+
 
 module Criteria
   class Config
@@ -227,15 +229,15 @@ module TADsPec
     suite = suite_class.new
     tests = test_names.empty? ? tests_de(suite_class) : test_names.map { |name| "testear_que_#{name}".to_sym }
 
-    resultado_suite = new ResultadoSuite(suite)
+    resultado_suite = ResultadoSuite.new(suite)
     tests.each do |test|
       begin
         suite.send(test)
-        resultado_suite.agregar_resultado(new ResultadoExitoso(test))
+        resultado_suite.agregar_resultado(ResultadoExitoso.new(test))
       rescue StandardError => e
-        resultado_suite.agregar_resultado(new ResultadoExplotado(test, e))
+        resultado_suite.agregar_resultado(ResultadoExplotado.new(test, e))
       rescue TadspecAssertionError => e
-        resultado_suite.agregar_resultado(new ResultadoFallido(test, e))
+        resultado_suite.agregar_resultado(ResultadoFallido.new(test, e))
       end
     end
     resultado_suite #devuelve

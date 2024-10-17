@@ -30,11 +30,42 @@ class ResultadoSuite
   end
 
   def mostrar_resultados
+    puts "Resultado de la suite: #{resultado_suite}"
+    puts "Total de tests: #{cantidad}"
+    puts "Exitosos: #{cantidad_exitosos}"
+    puts "Fallidos: #{cantidad_fallidos}"
+    puts "Explotados: #{cantidad_explotados}"
     puts "\nResultados de la suite: #{@suite}"
     @resultados.each do |resultado|
       resultado.mostrar
     end
   end
+
+  def resultado_suite
+    if @resultados.any?{|resultado| resultado.is_a?(ResultadoExplotado)}
+      "Test de Suite Explotado"
+    elsif @resultados.any?{|resultado| resultado.is_a?(ResultadoFallido)}
+      "Test de Suite Fallido"
+    elsif @resultados.all?{|resultado| resultado.is_a?(ResultadoExitoso)}
+      "Test de Suite Exitoso"
+    end
+  end
+  def cantidad
+    @resultados.size
+  end
+
+  def cantidad_exitosos
+    @resultados.filter {|resultado| resultado.is_a?(ResultadoExitoso)}.size
+  end
+
+  def cantidad_fallidos
+    @resultados.filter {|resultado| resultado.is_a?(ResultadoFallido)}.size
+  end
+
+  def cantidad_explotados
+    @resultados.filter {|resultado| resultado.is_a?(ResultadoExplotado)}.size
+  end
+
 end
 
 class ResultadoExitoso
