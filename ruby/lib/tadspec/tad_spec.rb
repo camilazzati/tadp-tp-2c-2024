@@ -234,10 +234,11 @@ module TADsPec
       begin
         suite.send(test)
         resultado_suite.agregar_resultado(ResultadoExitoso.new(test))
-      rescue StandardError => e
-        resultado_suite.agregar_resultado(ResultadoExplotado.new(test, e))
       rescue TadspecAssertionError => e
         resultado_suite.agregar_resultado(ResultadoFallido.new(test, e))
+      rescue StandardError => e
+        resultado_suite.agregar_resultado(ResultadoExplotado.new(test, e))
+
       end
     end
     resultado_suite #devuelve

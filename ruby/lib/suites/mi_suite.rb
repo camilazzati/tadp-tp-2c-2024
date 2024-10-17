@@ -11,11 +11,16 @@ class MiSuite
     leandro.edad.deberia ser 22
   end
 
+  def testear_que_falla
+    leandro = Persona.new('Leandro', 22)
+    leandro.edad.deberia ser 23
+  end
+
   def testear_que_7_es_mayor_a_5
     7.deberia ser mayor_a 5
   end
 
-  def testear_que_falla
+  def testear_que_explota
     leandro = Persona.new('Leandro', 22)
     en { leandro.viejo? }.deberia explotar_con NoMethodError
   end

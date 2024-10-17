@@ -30,6 +30,11 @@ describe "Testear que se recolectan los métodos" do
     TADsPec.testear(MiSuite, "explota")
   end
 
+  it 'Falla' do
+    TADsPec.registrar_suite(MiSuite)
+    TADsPec.testear(MiSuite, "falla")
+  end
+
   it 'Funciona sin parametros' do
     TADsPec.registrar_suite(MiSuite)
     TADsPec.testear
