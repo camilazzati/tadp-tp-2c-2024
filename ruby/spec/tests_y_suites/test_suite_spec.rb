@@ -10,7 +10,7 @@ describe "Testear que se recolectan los métodos" do
     expect(TADsPec.ver_suites).to eq([MiSuite])
   end
 
-  it 'Funciona y Corre algunas test especificado de MiSuite' do
+  it 'Se ejecutan algunos test especificados de MiSuite y falla 1' do
     TADsPec.registrar_suite(MiSuite)
     TADsPec.testear(MiSuite,
                     :testear_que_leandro_tiene_22,
@@ -19,14 +19,13 @@ describe "Testear que se recolectan los métodos" do
                     :testear_que_falla)
   end
 
-  it 'Funciona y Corre todos los tests de MiSuite' do
+  it 'Ejecuta todos los tests de MiSuite, fallan 2 y explotan 2' do
     TADsPec.registrar_suite(MiSuite)
     TADsPec.testear(MiSuite)
   end
 
-  it 'Funciona y Corre todos los suites' do
+  it 'Ejecuta todos los suites con sus respectivos tests' do
     TADsPec.registrar_suite(MiSuite)
     TADsPec.testear
   end
-
 end

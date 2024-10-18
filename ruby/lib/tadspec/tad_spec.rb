@@ -16,11 +16,11 @@ module TADsPec
       @suites
     end
 
-    def testear(suite = nil, *test_names)
-      if suite.nil?
+    def testear(suite_class = nil, *test_names)
+      if suite_class.nil?
         testear_todas_las_suites
       else
-        resultado_suite = testear_suite(suite, *test_names)
+        resultado_suite = testear_suite(suite_class, *test_names)
         resultado_suite.mostrar_resultados
       end
     end
@@ -28,8 +28,7 @@ module TADsPec
     def testear_todas_las_suites
       resultados_totales = ResultadoTotal.new
       @suites.each do |suite_class|
-        suite = crear_suite(suite_class)
-        resultado_suite = suite.testear
+        resultado_suite = testear_suite(suite_class)
         resultados_totales.agregar_resultado_suite(resultado_suite)
       end
       resultados_totales.mostrar_resultado_total
@@ -37,20 +36,14 @@ module TADsPec
 
     def testear_suite(suite_class, *test_names)
       suite_instance = suite_class.new
-      suite = crear_suite(suite_instance, *test_names)
-      suite.testear
+      suite = crear_suite(suite_instance)
+      suite.testear(*test_names)
     end
 
-    def crear_suite(suite_instance, *test_names)
+    def crear_suite(suite_instance)
       suite_class = Suite.new(suite_instance.class)
-      if test_names.empty?
-        suite_instance.class.instance_methods(false).each do |method_test|
-          if suite_instance.method(method_test).arity == 0 && method_test.to_s.start_with?("testear_que_")
-            suite_class.agregar_test(method_test) { suite_instance.send(method_test) }
-          end
-        end
-      else
-        test_names.each do |method_test|
+      suite_instance.class.instance_methods(false).each do |method_test|
+        if suite_instance.method(method_test).arity == 0 && method_test.to_s.start_with?("testear_que_")
           suite_class.agregar_test(method_test) { suite_instance.send(method_test) }
         end
       end

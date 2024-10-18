@@ -36,7 +36,7 @@ class ResultadoSuite
     puts "Exitosos: #{cantidad_exitosos}\n"
     puts "Fallidos: #{cantidad_fallidos}\n"
     puts "Explotados: #{cantidad_explotados}\n"
-    puts "Resultados de la suite: #{@suite}"
+    puts "Resultados de la suite: #{@suite}\n"
     @resultados.each do |resultado|
       resultado.mostrar
     end
@@ -51,6 +51,7 @@ class ResultadoSuite
       "Test de Suite Exitoso"
     end
   end
+
   def cantidad
     @resultados.size
   end
