@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 class ResultadoTotal
   attr_reader :resultados_suites
 
@@ -30,12 +31,12 @@ class ResultadoSuite
   end
 
   def mostrar_resultados
-    puts "Resultado de la suite: #{resultado_suite}"
-    puts "Total de tests: #{cantidad}"
-    puts "Exitosos: #{cantidad_exitosos}"
-    puts "Fallidos: #{cantidad_fallidos}"
-    puts "Explotados: #{cantidad_explotados}"
-    puts "\nResultados de la suite: #{@suite}"
+    puts "Resultado de la suite: #{resultado_suite}\n"
+    puts "Total de tests: #{cantidad}\n"
+    puts "Exitosos: #{cantidad_exitosos}\n"
+    puts "Fallidos: #{cantidad_fallidos}\n"
+    puts "Explotados: #{cantidad_explotados}\n"
+    puts "Resultados de la suite: #{@suite}"
     @resultados.each do |resultado|
       resultado.mostrar
     end
@@ -75,7 +76,7 @@ class ResultadoExitoso
     @nombre = nombre
   end
 
-  def mostrar()
+  def mostrar
     puts("✅ #{@nombre} pasó correctamente.")
   end
 end
@@ -88,7 +89,7 @@ class ResultadoFallido
     @error = error
   end
 
-  def mostrar()
+  def mostrar
     puts("❌ #{@nombre} falló: #{@error.message}")
   end
 end

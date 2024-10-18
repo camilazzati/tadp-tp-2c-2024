@@ -1,6 +1,6 @@
 # frozen_string_literal: true
-require_relative '../resultado'
-require_relative '../tadspec/tad_spec'
+require_relative 'resultado'
+require_relative 'tad_spec'
 
 class Suite
   attr_accessor :nombre, :tests
@@ -10,6 +10,7 @@ class Suite
     @tests = []
   end
 
+  # Agrego a la lista el nombre del test y su bloque que representa el código a ejectuar
   def agregar_test(nombre_test, &bloque)
     @tests << {nombre: nombre_test, bloque: bloque}
   end
