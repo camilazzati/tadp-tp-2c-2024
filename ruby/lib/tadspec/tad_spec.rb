@@ -18,7 +18,7 @@ module TADsPec
       end
     end
 
-    # Verifica si una clase tiene al menos un método de prueba válido
+    # Verifica si una clase tiene al menos uno o más métodos de test válidos
     def es_una_suite?(klass)
       klass.instance_methods(false).any? do |method|
         method.to_s.start_with?("testear_que_") && klass.instance_method(method).arity == 0
@@ -43,6 +43,7 @@ module TADsPec
       end
     end
 
+    # Recorro la lista de las Suites y obtengo sus métodos a testear
     def testear_todas_las_suites
       resultados_totales = ResultadoTotal.new
       @suites.each do |suite_class|
