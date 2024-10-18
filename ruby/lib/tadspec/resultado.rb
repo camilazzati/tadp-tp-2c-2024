@@ -31,6 +31,7 @@ class ResultadoSuite
   end
 
   def mostrar_resultados
+    puts "----------------------------- RESULTADOS DE #{@suite} -----------------------------------"
     puts "Resultado de la suite: #{resultado_suite}\n"
     puts "Total de tests: #{cantidad}\n"
     puts "Exitosos: #{cantidad_exitosos}\n"
@@ -40,6 +41,7 @@ class ResultadoSuite
     @resultados.each do |resultado|
       resultado.mostrar
     end
+    puts "--------------------------------- END DE #{@suite} ---------------------------------------"
   end
 
   def resultado_suite
@@ -78,7 +80,7 @@ class ResultadoExitoso
   end
 
   def mostrar
-    puts("✅ #{@nombre} pasó correctamente.")
+    puts("✅ #{@nombre} pasó correctamente.\n")
   end
 end
 
@@ -91,7 +93,7 @@ class ResultadoFallido
   end
 
   def mostrar
-    puts("❌ #{@nombre} falló: #{@error.message}")
+    puts("❌ #{@nombre} falló: #{@error.message}\n")
   end
 end
 
@@ -104,7 +106,7 @@ class ResultadoExplotado
   end
 
   def mostrar
-    puts("💥 #{@nombre} explotó con error: #{@error.message}\n#{@error.backtrace.join("\n")}")
+    puts("💥 #{@nombre} explotó con error: #{@error.message}\n#{@error.backtrace.join("\n")}\n")
   end
 end
 
