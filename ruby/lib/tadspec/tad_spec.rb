@@ -8,8 +8,26 @@ module TADsPec
   class << self
     attr_reader :suites
 
+    # Este método se ejecutará al cargar el módulo y registrará automáticamente todas las suites válidas
+    def registrar_suites_automaticamente
+      ObjectSpace.each_object(Class) do |klass|
+        # Verificar si la clase tiene métodos válidos para ser considerada suite
+        if es_una_suite?(klass)
+          registrar_suite(klass)
+        end
+      end
+    end
+
+    # Verifica si una clase tiene al menos un método de prueba válido
+    def es_una_suite?(klass)
+      klass.instance_methods(false).any? do |method|
+        method.to_s.start_with?("testear_que_") && klass.instance_method(method).arity == 0
+      end
+    end
+
+    # Registrar manualmente una suite
     def registrar_suite(suite_class)
-      @suites << suite_class
+      @suites << suite_class unless @suites.include?(suite_class)
     end
 
     def ver_suites
@@ -52,28 +70,5 @@ module TADsPec
   end
 end
 
-
-
-  # Mensaje para correr una suite específica con tests específicos (si se pasan)
-  #def self.testear_suite(suite_class, *test_names)
-  #  suite = suite_class.new
-  #  tests = test_names.empty? ? tests_de(suite_class) : test_names.map { |name| "testear_que_#{name}".to_sym }
-
-  #    resultado_suite = ResultadoSuite.new(suite)
-  # tests.each do |test|
-  #   begin
-  #     suite.send(test)
-  #     resultado_suite.agregar_resultado(ResultadoExitoso.new(test))
-  #   rescue TadspecAssertionError => e
-  #     resultado_suite.agregar_resultado(ResultadoFallido.new(test, e))
-  #   rescue StandardError => e
-  #     resultado_suite.agregar_resultado(ResultadoExplotado.new(test, e))
-  #
-  #   end
-  # end
-  # resultado_suite #devuelve
-
-#end
-
-
-
+# Registrar automáticamente las suites al cargar el módulo
+TADsPec.registrar_suites_automaticamente
