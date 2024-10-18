@@ -72,12 +72,12 @@ class OtraSuite
 
   # TADsPec debería almacenar este mensaje
   def testear_que_7_es_7
-    7.edad.deberia ser 7
+    7.edad.deberia ser igual_a 7
   end
 
   def testear_que_falla
     leandro = Persona.new('Pepe', 50)
-    leandro.edad.deberia ser 51
+    leandro.edad.deberia ser igual_a 51
   end
 
   def testear_que_7_es_mayor_a_5
