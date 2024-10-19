@@ -68,6 +68,11 @@ module TADsPec
       end
       suite_class
     end
+
+    def restablecer
+      MockRealizados.restablecer
+      Module.remove_method(:mockear)
+    end
   end
 end
 
