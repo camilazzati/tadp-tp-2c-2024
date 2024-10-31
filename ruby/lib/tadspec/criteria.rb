@@ -43,8 +43,8 @@ module Criteria
     end
   end
 
-  def no( criteria )
-    proc { | object | !criteria.call(object) }
+  def no(criteria)
+    Config.new(proc { | object | !criteria.call(object) })
   end
 
   def entender(mensaje)
