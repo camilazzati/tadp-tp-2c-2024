@@ -1,33 +1,28 @@
+require_relative 'criteria'
+
 module Spy
   def self.espiar(objeto)
-    # Crear un proxy del objeto original que registre las llamadas a métodos
+    # Crear un proxy del objeto que registre las llamadas a métodos
     spy = objeto.dup
-    spy.instance_variable_set(:@__spy_registry, [])
-
-    # Guardar una referencia al objeto original
-    original_objeto = objeto
-
-    # Definir un método para obtener las interacciones registradas
-    def spy.spy_registry
-      @__spy_registry
-    end
+    spy.define_singleton_method(:spy_registry) { @spy_registry ||= [] }
+    objeto_original = objeto
 
     # Definir un método para verificar si un método fue llamado
     def spy.haber_recibido(metodo)
-      llamadas = @__spy_registry.select { |registro| registro[:metodo] == metodo }
+      llamadas = spy_registry.select { |registro| registro[:metodo] == metodo }
       if llamadas.empty?
         raise "El método #{metodo} no fue llamado."
       else
-        VerificadorLlamada.new(llamadas)
+        Config.new(VerificadorLlamada.new(llamadas))
       end
     end
 
     # Redefinir los métodos del objeto para interceptar las llamadas
     objeto.public_methods(false).each do |metodo|
       spy.define_singleton_method(metodo) do |*args, &block|
-        @__spy_registry << { metodo: metodo, argumentos: args }
+        spy_registry << { metodo: metodo, argumentos: args }
         # Llamar al método original del objeto usando send
-        original_objeto.send(metodo, *args, &block)
+        objeto_original.send(metodo, *args, &block)
       end
     end
 
