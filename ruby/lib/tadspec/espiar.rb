@@ -13,7 +13,7 @@ module Spy
       if llamadas.empty?
         raise "El método #{metodo} no fue llamado."
       else
-        Config.new(VerificadorLlamada.new(llamadas))
+        VerificadorLlamada.new(llamadas)
       end
     end
 
@@ -33,17 +33,32 @@ module Spy
   class VerificadorLlamada
     def initialize(llamadas)
       @llamadas = llamadas
+      @verificaciones = []
     end
 
     def veces(cantidad)
-      raise "Se esperaba que el método se llamara #{cantidad} veces, pero se llamó #{@llamadas.size} veces." if @llamadas.size != cantidad
+      @verificaciones << proc {
+        if @llamadas.size != cantidad
+          raise "Se esperaba que el método se llamara #{cantidad} veces, pero se llamó #{@llamadas.size} veces."
+        end
+      }
       self
     end
 
     def con_argumentos(*args)
-      match = @llamadas.any? { |registro| registro[:argumentos] == args }
-      raise "El método no fue llamado con los argumentos esperados." unless match
+      @verificaciones << proc {
+        match = @llamadas.any? { |registro| registro[:argumentos] == args }
+        raise "El método no fue llamado con los argumentos esperados." unless match
+      }
       self
+    end
+
+    # Este método ejecuta todas las verificaciones acumuladas cuando se llama al mensaje Deberia
+    def to_proc
+      proc do
+        @verificaciones.each(&:call)
+        true
+      end
     end
   end
 end
