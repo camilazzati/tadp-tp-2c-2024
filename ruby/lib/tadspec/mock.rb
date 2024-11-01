@@ -2,10 +2,13 @@
 class Module
   def mockear(nombre_metodo, &bloque)
       clase = self
+      # Esto falla porque guardar no es un metodo de clase
       MockRealizados.guardar(Mock.new(clase, nombre_metodo, &bloque))
   end
 end
 
+# Acá creo que les quedo a medio hacer si MockRealizado es un unico repositorio global o uno con varias instancias 
+# porque initialize es algo que solo se llama cuando se crea una instancia pero restablecer es un metodo de clase
 module MockRealizados
   @mocks
   def initialize()
@@ -26,6 +29,7 @@ end
 class Mock
   attr_accessor :clase, :metodo_original
 
+  # No necesitas cambiarlo pero bloque original es un nombre bastante malo para identificar la definición del nuevo comportamiento
   def initialize(clase,nombre_metodo, &bloque_original)
     @clase = clase
     @metodo_original = clase.instance_method(nombre_metodo)
