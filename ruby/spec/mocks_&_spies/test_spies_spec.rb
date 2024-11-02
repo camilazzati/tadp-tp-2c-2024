@@ -46,4 +46,12 @@ describe 'Testeo la funcionalidad del Spy, sin implementar el TADsPec y Criteria
 
     expect(pato.haber_recibido(:viejo?).con_argumentos).to be(true)
   end
+
+  it 'Persona mockea viejo' do
+    Persona.mockear(:viejo?) {true}
+
+    pato = Persona.new("Pato", 23)
+
+    expect(pato.viejo?).to be(true)
+  end
 end
