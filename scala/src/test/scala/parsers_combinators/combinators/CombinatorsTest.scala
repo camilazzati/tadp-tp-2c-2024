@@ -60,5 +60,43 @@ class CombinatorsTest extends AnyFreeSpec with Combinators {
       }
     }
 
+    "El combinador rightmost (~>):" - {
+      "debería devolver solo el resultado del segundo parser en caso de éxito" in {
+        val parser = char('a') ~> char('b')
+        parser("abc") shouldBe ParseSuccess('b', "c")
+      }
+
+      "integer ~> char" in {
+        val parser = integer ~> char('a')
+        parser("123abc") shouldBe ParseSuccess('a', "bc")
+      }
+
+      "double ~> char" in {
+        val parser = double ~> char('a')
+        parser("123.456abc") shouldBe ParseSuccess('a', "bc")
+      }
+
+      "integer ~> string" in {
+        val parser = integer ~> string("abc")
+        parser("123abc") shouldBe ParseSuccess("abc", "")
+      }
+
+      "double ~> string" in {
+        val parser = double ~> string("abc")
+        parser("123.456abc") shouldBe ParseSuccess("abc", "")
+      }
+
+      "debería fallar si el primer parser falla" in {
+        val parser = char('x') ~> char('b')
+        parser("abc") shouldBe a[ParseFailure]
+      }
+
+      "debería fallar si el segundo parser falla" in {
+        val parser = char('a') ~> char('x')
+        parser("abc") shouldBe a[ParseFailure]
+      }
+    }
+
+
   }
 }

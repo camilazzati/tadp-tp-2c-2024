@@ -30,4 +30,15 @@ trait Combinators extends BasicParsers{
       }
   }
 
+  // Rightmost Combinator: ejecuta dos parsers y devuelve el resultado del segundo
+  // Sintaxis: (primerParser ~> segundoParser)
+  implicit class RightmostCombinator[T](parser1: Parser[T]) {
+    def ~>[U](parser2: Parser[U]): Parser[U] = input =>
+      parser1(input) match {
+        case ParseSuccess(_, rest1) => parser2(rest1)
+        case failure: ParseFailure => failure
+      }
+  }
+
+
 }
