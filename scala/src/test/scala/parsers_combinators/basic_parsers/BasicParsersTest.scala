@@ -1,7 +1,7 @@
 package parsers_combinators.basic_parsers
 
 import org.scalatest.freespec.AnyFreeSpec
-import org.scalatest.matchers.should.Matchers.convertToAnyShouldWrapper
+import org.scalatest.matchers.should.Matchers.shouldBe
 
 class BasicParsersTest extends AnyFreeSpec with BasicParsers {
   "BasicParsers" - {
