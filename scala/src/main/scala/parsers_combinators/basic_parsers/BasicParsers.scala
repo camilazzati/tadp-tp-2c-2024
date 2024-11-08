@@ -8,8 +8,7 @@ trait BasicParsers {
   case class ParseFailure(message: String) extends ParseResult[Nothing]
 
   // Tipo Parser que recibe un String y devuelve un resultado de parseo
-  // TODO: Analizar si debería ser privado o público :/
-  private type Parser[T] = String => ParseResult[T]
+  type Parser[T] = String => ParseResult[T]
 
   // Parser que reconoce cualquier carácter
   def anyChar: Parser[Char] = string =>
