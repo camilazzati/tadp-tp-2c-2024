@@ -97,6 +97,28 @@ class CombinatorsTest extends AnyFreeSpec with Combinators {
       }
     }
 
+    "El combinador leftmost (<~):" - {
+      "debería devolver solo el resultado del primer parser en caso de éxito" in {
+        val parser = char('a') <~ char('b')
+        parser("abc") shouldBe ParseSuccess('a', "c")
+      }
+
+      "debería devolver solo el resultado del primer parser en caso de éxito - Con Strings" in {
+        // Sirve para eliminar :o
+        val parser = string("TADP") <~ string(" X")
+        parser("TADP X") shouldBe ParseSuccess("TADP", "")
+      }
+
+      "debería fallar si el primer parser falla" in {
+        val parser = char('x') <~ char('b')
+        parser("abc") shouldBe a[ParseFailure]
+      }
+
+      "debería fallar si el segundo parser falla" in {
+        val parser = char('a') <~ char('x')
+        parser("abc") shouldBe a[ParseFailure]
+      }
+    }
 
   }
 }

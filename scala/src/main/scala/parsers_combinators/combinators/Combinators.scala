@@ -40,5 +40,23 @@ trait Combinators extends BasicParsers{
       }
   }
 
+  // Leftmost Combinator: ejecuta dos parsers y devuelve el resultado del primero
+  // Sintaxis: (primerParser <~ segundoParser)
+  implicit class LeftmostCombinator[T](parser1: Parser[T]) {
+    // Basicamente lo que hace es (marea bastante):
+    // * Verifica que devuelva solo el resultado del primer parser.
+    // * Comprueba que falla si el primer o segundo parser fallan.
+    // * Parsea lo primero y despues parsea lo segundo pero deja como 
+    // resultado el primero y luego el resto del segundo
+    def <~[U](parser2: Parser[U]): Parser[T] = input =>
+      parser1(input) match {
+        case ParseSuccess(result1, rest1) =>
+          parser2(rest1) match {
+            case ParseSuccess(_, rest2) => ParseSuccess(result1, rest2)
+            case failure: ParseFailure => failure
+          }
+        case failure: ParseFailure => failure
+      }
+  }
 
 }
