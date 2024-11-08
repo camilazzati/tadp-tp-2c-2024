@@ -36,5 +36,29 @@ class CombinatorsTest extends AnyFreeSpec with Combinators {
         parser("TADP") shouldBe a[ParseFailure]
       }
     }
+
+    "El combinador de concatenación (<>):" - {
+      "debería devolver una tupla con los resultados de ambos parsers en caso de éxito" in {
+        val parser = char('a') <> char('b')
+        parser("abc") shouldBe ParseSuccess(('a', 'b'), "c")
+      }
+
+      "debería devolver una tupla con los resultados de ambos parsers en caso de éxito - Con Strings" in {
+        // Hay qye tener cuidado con los espacios :/
+        val parser = string("Hola ") <> string("mundo")
+        parser("Hola mundo") shouldBe ParseSuccess(("Hola ", "mundo"), "")
+      }
+
+      "debería fallar si el primer parser falla" in {
+        val parser = char('x') <> char('b')
+        parser("abc") shouldBe a[ParseFailure]
+      }
+
+      "debería fallar si el segundo parser falla" in {
+        val parser = char('a') <> char('x')
+        parser("abc") shouldBe a[ParseFailure]
+      }
+    }
+
   }
 }
