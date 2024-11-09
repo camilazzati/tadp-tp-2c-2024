@@ -36,5 +36,89 @@ class CombinatorsTest extends AnyFreeSpec with Combinators {
         parser("TADP") shouldBe a[ParseFailure]
       }
     }
+
+    "El combinador de concatenación (<>):" - {
+      "debería devolver una tupla con los resultados de ambos parsers en caso de éxito" in {
+        val parser = char('a') <> char('b')
+        parser("abc") shouldBe ParseSuccess(('a', 'b'), "c")
+      }
+
+      "debería devolver una tupla con los resultados de ambos parsers en caso de éxito - Con Strings" in {
+        // Hay qye tener cuidado con los espacios :/
+        val parser = string("Hola ") <> string("mundo")
+        parser("Hola mundo") shouldBe ParseSuccess(("Hola ", "mundo"), "")
+      }
+
+      "debería fallar si el primer parser falla" in {
+        val parser = char('x') <> char('b')
+        parser("abc") shouldBe a[ParseFailure]
+      }
+
+      "debería fallar si el segundo parser falla" in {
+        val parser = char('a') <> char('x')
+        parser("abc") shouldBe a[ParseFailure]
+      }
+    }
+
+    "El combinador rightmost (~>):" - {
+      "debería devolver solo el resultado del segundo parser en caso de éxito" in {
+        val parser = char('a') ~> char('b')
+        parser("abc") shouldBe ParseSuccess('b', "c")
+      }
+
+      "integer ~> char" in {
+        val parser = integer ~> char('a')
+        parser("123abc") shouldBe ParseSuccess('a', "bc")
+      }
+
+      "double ~> char" in {
+        val parser = double ~> char('a')
+        parser("123.456abc") shouldBe ParseSuccess('a', "bc")
+      }
+
+      "integer ~> string" in {
+        val parser = integer ~> string("abc")
+        parser("123abc") shouldBe ParseSuccess("abc", "")
+      }
+
+      "double ~> string" in {
+        val parser = double ~> string("abc")
+        parser("123.456abc") shouldBe ParseSuccess("abc", "")
+      }
+
+      "debería fallar si el primer parser falla" in {
+        val parser = char('x') ~> char('b')
+        parser("abc") shouldBe a[ParseFailure]
+      }
+
+      "debería fallar si el segundo parser falla" in {
+        val parser = char('a') ~> char('x')
+        parser("abc") shouldBe a[ParseFailure]
+      }
+    }
+
+    "El combinador leftmost (<~):" - {
+      "debería devolver solo el resultado del primer parser en caso de éxito" in {
+        val parser = char('a') <~ char('b')
+        parser("abc") shouldBe ParseSuccess('a', "c")
+      }
+
+      "debería devolver solo el resultado del primer parser en caso de éxito - Con Strings" in {
+        // Sirve para eliminar :o
+        val parser = string("TADP") <~ string(" X")
+        parser("TADP X") shouldBe ParseSuccess("TADP", "")
+      }
+
+      "debería fallar si el primer parser falla" in {
+        val parser = char('x') <~ char('b')
+        parser("abc") shouldBe a[ParseFailure]
+      }
+
+      "debería fallar si el segundo parser falla" in {
+        val parser = char('a') <~ char('x')
+        parser("abc") shouldBe a[ParseFailure]
+      }
+    }
+
   }
 }
