@@ -1,21 +1,21 @@
-package parsers_combinators.basic_parsers
+package parsers_combinators
 
 trait BasicParsers {
   // Tipo de resultado de un parseo
   // sealed indica que el trait solo puede ser extendido en el mismo archivo de origen donde se declara.
-  sealed trait ParseResult[+T]
+  trait ParseResult[+T]
 
   case class ParseSuccess[T](result: T, resto: String) extends ParseResult[T]
 
   case class ParseFailure(message: String) extends ParseResult[Nothing]
-
-  // Tipo Parser que recibe un String y devuelve un resultado de parseo
-  type Parser[T] = String => ParseResult[T]
-
+  
   // Parser que reconoce cualquier carácter
   def anyChar: Parser[Char] = string =>
     if (string.nonEmpty) ParseSuccess(string.head, string.tail)
     else ParseFailure("String vacío")
+
+  // Tipo Parser que recibe un String y devuelve un resultado de parseo
+  type Parser[T] = String => ParseResult[T]
 
   // Parser que reconoce un carácter en específico
   def char(c: Char): Parser[Char] = string =>
@@ -106,7 +106,4 @@ trait BasicParsers {
       case failure: ParseFailure => failure
     }
   }
-
-
-
 }
