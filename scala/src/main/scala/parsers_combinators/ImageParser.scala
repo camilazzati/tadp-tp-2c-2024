@@ -45,5 +45,5 @@ trait ImageParser extends BasicParsers with Combinators {
     }
 
   // Parser general para descripciones de imágenes
-  val descripcionImagen: Parser[Figura] = figura <|> grupo <|> color <|> escala
+  val descripcionImagen: Parser[Figura] = escala <|> grupo <|> figura <|> color
 }
