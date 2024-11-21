@@ -2,6 +2,7 @@ package parsers_combinators.combinators
 
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.should.Matchers.{a, shouldBe}
+import parsers_combinators.basic_parsers.*
 
 class CombinatorsTest extends AnyFreeSpec with Combinators {
   "Combinators" - {
