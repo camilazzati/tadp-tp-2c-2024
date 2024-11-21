@@ -1,5 +1,4 @@
-package parsers_combinators.basic_parsers
-
+package parsers_combinators
 
 trait BasicParsers {
   // Tipo de resultado de un parseo

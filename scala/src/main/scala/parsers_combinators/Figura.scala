@@ -1,5 +1,7 @@
 package parsers_combinators.dibujo
 
+import parsers_combinators.{BasicParsers, Combinators}
+
 sealed trait Figura
 case class Triangulo(p1: Punto, p2: Punto, p3: Punto) extends Figura
 case class Rectangulo(p1: Punto, p2: Punto) extends Figura
@@ -14,4 +16,3 @@ case class Rotacion(angulo: Double, figura: Figura) extends Transformacion
 case class Traslacion(dx: Double, dy: Double, figura: Figura) extends Transformacion
 
 case class Grupo(figuras: List[Figura]) extends Figura
-
