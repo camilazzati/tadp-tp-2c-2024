@@ -122,5 +122,24 @@ class CombinatorsTest extends AnyFreeSpec with Combinators {
       }
     }
 
+    "El cominador sepBy:" - {
+      "debería devolver el resultado exitoso" in {
+        val parserNumeroDeTelefono = integer.sepBy(char('-'))
+        parserNumeroDeTelefono("1234-5678") shouldBe ParseSuccess(List(1234, 5678) , "")
+      }
+      "debería devolver el resultado exitoso pero con resto" in {
+        val parserNumeroDeTelefono = integer.sepBy(char('-'))
+        parserNumeroDeTelefono("1234 5678") shouldBe ParseSuccess(List(1234), " 5678")
+      }
+      "debería devolver el resultado fallido" in {
+        val parserNumeroDeTelefono = integer.sepBy(char('-'))
+        parserNumeroDeTelefono("abcd-5678") shouldBe a[ParseFailure]
+      }
+      "debería devolver el resultado exitoso con strings" in {
+        val parserString = string("hola").sepBy(char(',')) // Acá tira el error
+        parserString("hola,mundo") shouldBe ParseSuccess(List("hola"), "mundo")
+      }
+    }
+
   }
 }
