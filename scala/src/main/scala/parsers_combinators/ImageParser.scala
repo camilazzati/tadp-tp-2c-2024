@@ -1,6 +1,6 @@
 package parsers_combinators
 
-import parsers_combinators.dibujo.{Punto, Rectangulo, Triangulo, Circulo, Figura, Grupo, Color, Escala}
+import parsers_combinators.dibujo._
 
 trait ImageParser extends BasicParsers with Combinators {
   // Parser para puntos
@@ -44,6 +44,52 @@ trait ImageParser extends BasicParsers with Combinators {
       case ((sx, sy), fig) => Escala(sx, sy, fig)
     }
 
+  private val rotacion: Parser[Rotacion] =
+    string("rotacion[") ~> double <~ char(']') <> figura map {
+      case (angulo, fig) => Rotacion(angulo % 360, fig)
+    }
+
+  private val traslacion: Parser[Traslacion] =
+    string("traslacion[") ~> (double <> (char(',') ~> double) <> figura) <~ char(']') map {
+      case ((dx, dy), fig) => Traslacion(dx, dy, fig)
+    }
+
   // Parser general para descripciones de imágenes
-  val descripcionImagen: Parser[Figura] = escala <|> grupo <|> figura <|> color
+  val descripcionImagen: Parser[Figura] =
+    escala <|> rotacion <|> traslacion <|> grupo <|> figura <|> color
+
+  // Simplificación del AST utilizando un enfoque funcional/objetual
+  def simplificarAST(figura: Figura): Figura = figura match {
+    case Grupo(figuras) => Grupo(figuras.map(simplificarAST))
+    case t: Transformacion => SimplificadorTransformacion.simplificar(t)
+    case otraFigura => otraFigura
+  }
+}
+
+object SimplificadorTransformacion {
+  def simplificar(figura: Figura): Figura = figura match {
+    case Color(r1, g1, b1, Color(r2, g2, b2, fig)) =>
+      simplificar(Color(r2, g2, b2, fig))
+
+    case Rotacion(angulo1, Rotacion(angulo2, fig)) =>
+      simplificar(Rotacion((angulo1 + angulo2) % 360, fig))
+
+    case Escala(sx1, sy1, Escala(sx2, sy2, fig)) =>
+      simplificar(Escala(sx1 * sx2, sy1 * sy2, fig))
+
+    case Traslacion(dx1, dy1, Traslacion(dx2, dy2, fig)) =>
+      simplificar(Traslacion(dx1 + dx2, dy1 + dy2, fig))
+
+    case Rotacion(0, fig) => simplificar(fig)
+    case Escala(1, 1, fig) => simplificar(fig)
+    case Traslacion(0, 0, fig) => simplificar(fig)
+
+    case Color(r, g, b, fig) => Color(r, g, b, simplificar(fig))
+    case Rotacion(angulo, fig) => Rotacion(angulo, simplificar(fig))
+    case Escala(sx, sy, fig) => Escala(sx, sy, simplificar(fig))
+    case Traslacion(dx, dy, fig) => Traslacion(dx, dy, simplificar(fig))
+
+    case Grupo(figuras) => Grupo(figuras.map(simplificar))
+    case otraFigura => otraFigura
+  }
 }
