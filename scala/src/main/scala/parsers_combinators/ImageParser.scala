@@ -2,7 +2,7 @@ package parsers_combinators
 
 import parsers_combinators.dibujo.{Punto, Rectangulo, Triangulo, Circulo, Figura, Grupo, Color, Escala}
 
-trait ImageParser extends BasicParsers with Combinators {
+trait ImageParser{
   // Parser para puntos
   private val punto: Parser[Punto] = (double <~ char('@')) <> double map {
     case (x, y) => Punto(x, y)

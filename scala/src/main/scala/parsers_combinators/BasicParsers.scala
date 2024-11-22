@@ -9,16 +9,12 @@ import scala.util.Try
 
   // Parser que reconoce cualquier carácter
    object anyChar extends Parser[Char] {
-
     def apply (string:String): Try[ParseResult[Char]] =
       Try(
             if (string.nonEmpty) ParseSuccess(string.head, string.tail)
             else ParseFailure("String vacío")
       )
   }
-
-  // Tipo Parser que recibe un String y devuelve un resultado de parseo
-  //type Parser[T] = String => ParseResult[T]
 
   // Parser que reconoce un carácter en específico
   case class char (c:Char) extends Parser[Char] {

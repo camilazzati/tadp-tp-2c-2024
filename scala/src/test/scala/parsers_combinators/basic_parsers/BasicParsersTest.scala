@@ -2,9 +2,9 @@ package parsers_combinators.basic_parsers
 
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.should.Matchers.shouldBe
-import parsers_combinators.BasicParsers
+import parsers_combinators.Parser
 
-class BasicParsersTest extends AnyFreeSpec with BasicParsers {
+class BasicParsersTest extends AnyFreeSpec {
   "BasicParsers" - {
 
     "anyChar" - {
