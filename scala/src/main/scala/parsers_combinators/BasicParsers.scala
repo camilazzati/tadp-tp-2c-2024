@@ -8,7 +8,7 @@ trait BasicParsers {
   case class ParseSuccess[T](result: T, resto: String) extends ParseResult[T]
 
   case class ParseFailure(message: String) extends ParseResult[Nothing]
-  
+
   // Parser que reconoce cualquier carácter
   def anyChar: Parser[Char] = string =>
     if (string.nonEmpty) ParseSuccess(string.head, string.tail)
@@ -50,10 +50,8 @@ trait BasicParsers {
     }
   }
 
-  // -------- OPERACIONES -------------
-
   // recibe un parser y una condicion, tiene que cumplir las dos cosas
-  def satisfies[T](parser: Parser[T], condicion:T => Boolean): Parser[T] = input => {
+  def satisfies[T](parser: Parser[T], condicion: T => Boolean): Parser[T] = input => {
     parser(input) match {
       // parsea y cumple condicion
       case ParseSuccess(result, resto) if condicion(result) => ParseSuccess(result, resto)
@@ -78,22 +76,23 @@ trait BasicParsers {
     def parserRecursivo(input: String, resultadosAcumulados: List[T]): ParseSuccess[List[T]] = {
       parser(input) match {
         // el parser es exitoso, agrega el resultado al acumulador y vuelve a llamar recursivamente
-        case ParseSuccess(result, resto) => parserRecursivo(resto, resultadosAcumulados :+ result )
+        case ParseSuccess(result, resto) => parserRecursivo(resto, resultadosAcumulados :+ result)
         // el parser no es exitoso, devuelve el valor acumulado con el resto
         // si llegara a fallar en el primer recorrido, resultadosAcumulados estaria vacío y el input sería el del comienzo, asi que es tambien el caso base
         case failure: ParseFailure => ParseSuccess(resultadosAcumulados, input)
       }
     }
+
     parserRecursivo(input, List.empty)
   }
 
   // * pero se tiene que aplicar al menos 1 vez
   // puedo usar * y satisfies para que se fije que el resultado de * tenga algo como para asegurarse de que se parseo al menos una vez
-  def +[T](parser:Parser[T]): Parser[List[T]] = input => {
+  def +[T](parser: Parser[T]): Parser[List[T]] = input => {
     // TODO: hay que arreglar esto, las operaciones tendrian que ser clases como para poder aplicarse a los parsers: parser.*
     val kleeneParser = *(parser)
     satisfies(kleeneParser, _.nonEmpty)(input) match {
-      case ParseSuccess(result,resto) => ParseSuccess(result, resto)
+      case ParseSuccess(result, resto) => ParseSuccess(result, resto)
       case failure: ParseFailure => ParseFailure("No se pudo aplicar al menos 1 vez el parser")
     }
   }

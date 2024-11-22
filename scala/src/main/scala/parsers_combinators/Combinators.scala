@@ -59,26 +59,20 @@ trait Combinators extends BasicParsers {
       }
   }
 
-  // TODO: sepBy no se si lo termino de entender
   // Parser[List[T]]: parser contenido, parser separador, parser contenido, ...
   // sepBy: parsea 0 o más veces el parser de contenido separado por el parser separador
+  // Retorno: Retonar una Lista con los parseos
   implicit class SeparatedByCombinator[T](parser1: Parser[T]) {
-    def sepBy[U](parser2: Parser[U]): Parser[List[T]] = input => {
-      // hace + porque minimo tiene que ser exitoso el parser1 una vez
-      // opt del parser2 porque puede haber o no separador, y en caso de no haberlo devuelve solo el primer contenido
-      // <~ devuelve el parser contenido, es decir List[parserContenido, parserContenido, ...], pero no estoy segura de si tambien tiene que ir el separador en el resultado
-      (parser1 <~ (parser2.opt)).+ (input) match {
+    def sepBy[U](parser2: Parser[U]): Parser[List[T]] = input =>
+      (parser1 <~ parser2.opt).*(input) match {
         case ParseSuccess(result, resto) => ParseSuccess(result, resto)
         case failure: ParseFailure => failure
       }
-    }
   }
-
+  
   // ------------ OPERACIONES -------------
 
   implicit class Operaciones[T](parser: Parser[T]) {
-
-
     // recibe un parser y una condicion, tiene que cumplir las dos cosas
     def satisfies(condicion: T => Boolean): Parser[T] = input =>
       parser(input) match {
@@ -93,15 +87,16 @@ trait Combinators extends BasicParsers {
 
     // si el parser es exitoso lo aplica
     // si falla el resultado no contiene ningun valor y no consume ningun caracter
-    def opt: Parser[Option[T]] = input =>
+    def opt: Parser[Option[T]] = input => {
       parser(input) match {
         // envuelvo el result en Some para que el tipo coincida con Option
         case ParseSuccess(result, resto) => ParseSuccess(Some(result), resto)
         case failure: ParseFailure => ParseSuccess(None, input)
       }
+    }
 
 
-    def * : Parser[List[T]] = input =>
+    def * : Parser[List[T]] = input => {
       def parserRecursivo(input: String, resultadosAcumulados: List[T]): ParseSuccess[List[T]] =
         parser(input) match {
           // el parser es exitoso, agrega el resultado al acumulador y vuelve a llamar recursivamente
@@ -112,26 +107,27 @@ trait Combinators extends BasicParsers {
         }
 
       parserRecursivo(input, List.empty)
-
-
+    }
+    
     // * pero se tiene que aplicar al menos 1 vez
     // puedo usar * y satisfies para que se fije que el resultado de * tenga algo como para asegurarse de que se parseo al menos una vez
-    def + : Parser[List[T]] = input =>
+    def + : Parser[List[T]] = input => {
       val kleeneParser = parser.*
       //TODO: No se si te falta revisar esto
-      kleeneParser.satisfies(_.nonEmpty)(input) /*match {
+      kleeneParser.satisfies(_.nonEmpty)(input) match {
             case ParseSuccess(result, resto) => ParseSuccess(result, resto)
             case failure: ParseFailure => ParseFailure("No se pudo aplicar al menos 1 vez el parser")
-          }*/
+          }
+    }
 
     // parsea
     // convierte el valor parseado utilizando la función
-    def map[U](f: T => U): Parser[U] = input =>
+    def map[U](f: T => U): Parser[U] = input => {
       parser(input) match {
         case ParseSuccess(resultOriginal, resto) => ParseSuccess(f(resultOriginal), resto)
         case failure: ParseFailure => failure
       }
-
+    }
   }
 }
 

@@ -1,6 +1,5 @@
 package parsers_combinators.combinators
 
-import parsers_combinators.basic_parsers.*
 import org.scalatest.freespec.AnyFreeSpec
 import parsers_combinators.Combinators
 
