@@ -1,6 +1,7 @@
 package parsers_combinators
 
-import parsers_combinators.dibujo.{Punto, Rectangulo, Triangulo, Circulo, Figura, Grupo, Color, Escala}
+import parsers_combinators.dibujo.{Circulo, Color, Escala, Figura, Grupo, Punto, Rectangulo, Triangulo}
+import parsers_combinators.Parser
 
 trait ImageParser{
   // Parser para puntos

@@ -1,16 +1,16 @@
 package parsers_combinators
 
 import scala.util.{Failure, Success, Try}
-import parsers_combinators.ParseResult
+import parsers_combinators._
 
 import scala.annotation.tailrec
 
-class CombinatorsException extends Exception("El combinator falla con los parsers dados")
-
+class CombinatorsException(message: String) extends Exception(message)
+case class ParseSuccess[+T](result: T, resto: String)
 
 abstract class Parser[+T]{
 
-  def apply(input: String): Try[ParseResult[T]]
+  def apply(input: String): Try[ParseSuccess[T]]
 
   // OR Combinator: intenta con el primer parser, si falla, usa el segundo
   // Sintaxis: Parser1 <|> Parser2{
@@ -30,10 +30,10 @@ abstract class Parser[+T]{
        this.apply(input) match {
          case Success(ParseSuccess(result1, rest1)) => parser2.apply(rest1) match {
              case Success(ParseSuccess(result2, rest2)) => Success(ParseSuccess((result1, result2), rest2))
-             case Failure(_) => Failure(new CombinatorsException)
+             case Failure(_) => Failure(new CombinatorsException("Falla segundo parser"))
            // lo envuelve en un Failure de Try
            }
-         case Failure(_) => Failure(new CombinatorsException)
+         case Failure(_) => Failure(new CombinatorsException("Falla primer parser"))
        }
 
   // Rightmost Combinator: ejecuta dos parsers y devuelve el resultado del segundo
@@ -41,7 +41,7 @@ abstract class Parser[+T]{
   def ~>[U](parser2: Parser[U]): Parser[U] = input =>
      this.apply(input) match {
        case Success(ParseSuccess(_, rest1)) => parser2.apply(rest1)
-       case Failure(_) => Failure(new CombinatorsException)
+       case Failure(_) => Failure(new CombinatorsException("Falla primer parser"))
      }
 
   // Leftmost Combinator: ejecuta dos parsers y devuelve el resultado del primero
@@ -56,9 +56,9 @@ abstract class Parser[+T]{
        case Success(ParseSuccess(result1, rest1)) =>
          parser2.apply(rest1) match {
            case Success(ParseSuccess(_, rest2)) => Success(ParseSuccess(result1, rest2))
-           case Failure(_) => Failure(new CombinatorsException())
+           case Failure(_) => Failure(new CombinatorsException("Falla en el segundo parser"))
          }
-       case Failure(_) => Failure(new CombinatorsException())
+       case Failure(_) => Failure(new CombinatorsException("Falla en el primer parser"))
      }
 
   // Parser[List[T]]: parser contenido, parser separador, parser contenido, ...
@@ -67,7 +67,7 @@ abstract class Parser[+T]{
   def sepBy[U](parser2: Parser[U]): Parser[List[T]] = input =>
       (this <~ parser2.opt()).*()(input) match {
         case Success(ParseSuccess(result, resto)) => Success(ParseSuccess(result, resto))
-        case Failure(_) => Failure(CombinatorsException())
+        case Failure(_) => Failure(CombinatorsException("Falla el combinator"))
       }
 
   def satisfies(condicion: T => Boolean): Parser[T] = input =>
@@ -75,9 +75,9 @@ abstract class Parser[+T]{
       // parsea y cumple condicion
       case Success(ParseSuccess(result, resto)) if condicion(result) => Success(ParseSuccess(result, resto))
       // parsea pero no cumple condicion
-      case Success(ParseSuccess(_, _)) => Failure(CombinatorsException())
+      case Success(ParseSuccess(_, _)) => Failure(CombinatorsException("Parsea pero no cumple la condicion"))
       // no parsea
-      case Failure(_) => Failure(CombinatorsException())
+      case Failure(_) => Failure(CombinatorsException("No parsea"))
     }
 
   // si el parser es exitoso lo aplica
@@ -90,7 +90,7 @@ abstract class Parser[+T]{
     }
 
   def *(): Parser[List[T]] = input => {
-    def parserRecursivo(input: String, resultadosAcumulados: List[T]): Try[ParseResult[List[T]]] =
+    def parserRecursivo(input: String, resultadosAcumulados: List[T]): Try[ParseSuccess[List[T]]] =
       this.apply(input) match {
         // el parser es exitoso, agrega el resultado al acumulador y vuelve a llamar recursivamente
         case Success(ParseSuccess(result, resto)) => parserRecursivo(resto, resultadosAcumulados :+ result)
@@ -107,7 +107,7 @@ abstract class Parser[+T]{
     val kleeneParser = this.*()
     kleeneParser.satisfies(_.nonEmpty)(input) match {
       case Success(ParseSuccess(result, resto)) => Success(ParseSuccess(result, resto))
-      case Failure(_) => Failure(CombinatorsException())
+      case Failure(_) => Failure(CombinatorsException("No parseo al menos una vez"))
     }
   }
 
@@ -116,7 +116,7 @@ abstract class Parser[+T]{
   def map[U](f: T => U): Parser[U] = input =>
     this.apply(input) match {
       case Success(ParseSuccess(resultOriginal, resto)) => Success(ParseSuccess(f(resultOriginal), resto))
-      case Failure(_) => Failure(CombinatorsException())
+      case Failure(_) => Failure(CombinatorsException("Fallo el parser"))
     }
   
 
