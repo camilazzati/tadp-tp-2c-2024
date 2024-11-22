@@ -1,8 +1,13 @@
 package parsers_combinators
 
+import scala.util.{Failure, Success, Try}
 import parsers_combinators.BasicParsers
 
-trait Combinators extends BasicParsers {
+
+abstract class Parser[+T]{
+
+  def apply(input: String): Try[ParseResult[T]]
+  
   // OR Combinator: intenta con el primer parser, si falla, usa el segundo
   // Sintaxis: Parser1 <|> Parser2
   implicit class OrCombinator[T](parser1: Parser[T]) {
