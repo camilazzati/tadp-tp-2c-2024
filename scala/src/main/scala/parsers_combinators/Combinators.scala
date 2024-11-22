@@ -1,7 +1,5 @@
 package parsers_combinators
 
-import parsers_combinators.BasicParsers
-
 trait Combinators extends BasicParsers {
   // OR Combinator: intenta con el primer parser, si falla, usa el segundo
   // Sintaxis: Parser1 <|> Parser2

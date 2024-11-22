@@ -60,7 +60,7 @@ trait ImageParser extends BasicParsers with Combinators {
 
   // Simplificación del AST utilizando un enfoque funcional/objetual
   def simplificarAST(figura: Figura): Figura = figura match {
-    case Grupo(figuras) => Grupo(figuras.map(simplificarAST))
+    case Grupo(figuras) => SimplificadorTransformacion.simplificarGrupo(figuras.map(simplificarAST))
     case t: Transformacion => SimplificadorTransformacion.simplificar(t)
     case otraFigura => otraFigura
   }
@@ -68,11 +68,10 @@ trait ImageParser extends BasicParsers with Combinators {
 
 object SimplificadorTransformacion {
   def simplificar(figura: Figura): Figura = figura match {
-    case Color(r1, g1, b1, Color(r2, g2, b2, fig)) =>
-      simplificar(Color(r2, g2, b2, fig))
+    case Color(_, _, _,Color(r, g, b, fig)) => simplificar(Color(r, g, b, fig))
 
     case Rotacion(angulo1, Rotacion(angulo2, fig)) =>
-      simplificar(Rotacion((angulo1 + angulo2) / 360, fig))
+      simplificar(Rotacion((angulo1 + angulo2) % 360.0, fig))
 
     case Escala(sx1, sy1, Escala(sx2, sy2, fig)) =>
       simplificar(Escala(sx1 * sx2, sy1 * sy2, fig))
@@ -80,16 +79,38 @@ object SimplificadorTransformacion {
     case Traslacion(dx1, dy1, Traslacion(dx2, dy2, fig)) =>
       simplificar(Traslacion(dx1 + dx2, dy1 + dy2, fig))
 
-    case Rotacion(angulo, fig) if angulo % 360 == 0 => simplificar(fig)
+    case Rotacion(0, fig) => simplificar(fig)
     case Escala(1, 1, fig) => simplificar(fig)
     case Traslacion(0, 0, fig) => simplificar(fig)
 
+    case Grupo(figuras) => simplificarGrupo(figuras)
+
     case Color(r, g, b, fig) => Color(r, g, b, simplificar(fig))
-    case Rotacion(angulo, fig) => Rotacion(angulo % 360, simplificar(fig))
+    case Rotacion(angulo, fig) if angulo > 359 => Rotacion(angulo % 360, simplificar(fig))
     case Escala(sx, sy, fig) => Escala(sx, sy, simplificar(fig))
     case Traslacion(dx, dy, fig) => Traslacion(dx, dy, simplificar(fig))
 
-    case Grupo(figuras) => Grupo(figuras.map(simplificar))
     case otraFigura => otraFigura
+  }
+
+  def simplificarGrupo(figuras: List[Figura]): Figura = {
+    val figurasSimplificadas = figuras.map(simplificar)
+    val transformacionesComunes = figurasSimplificadas.collect {
+      case t: Transformacion => t
+    }
+
+    transformacionesComunes match {
+      case Nil => Grupo(figurasSimplificadas)
+      case Color(r, g, b, _) :: _ if figurasSimplificadas.forall {
+        case Color(`r`, `g`, `b`, _) => true
+        case _ => false
+      } =>
+        Color(r, g, b, Grupo(figurasSimplificadas.map {
+          case Color(_, _, _, fig) => fig
+          case otra => otra
+        }))
+
+      case _ => Grupo(figurasSimplificadas)
+    }
   }
 }
