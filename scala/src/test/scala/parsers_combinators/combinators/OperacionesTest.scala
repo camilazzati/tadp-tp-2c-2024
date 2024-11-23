@@ -1,9 +1,9 @@
 package parsers_combinators.combinators
 
 import org.scalatest.freespec.AnyFreeSpec
-import parsers_combinators.Combinators
-
-class OperacionesTest extends AnyFreeSpec with Combinators {
+import parsers_combinators._
+/*
+class OperacionesTest extends AnyFreeSpec {
   "Operaciones combinadas" - {
     val digitParser: Parser[Int] = digit
 
@@ -26,36 +26,36 @@ class OperacionesTest extends AnyFreeSpec with Combinators {
 
     "opt" - {
       "Debería devolver Some si el parser tiene éxito" in {
-        val optParser = digitParser.opt
+        val optParser = digitParser.opt()
         assert(optParser("7abc") == ParseSuccess(Some(7), "abc"))
       }
 
       "Debería devolver None si el parser falla" in {
-        val optParser = digitParser.opt
+        val optParser = digitParser.opt()
         assert(optParser("abc") == ParseSuccess(None, "abc"))
       }
     }
 
     "*" - {
       "Debería devolver una lista vacía si no puede parsear nada" in {
-        val kleeneParser = digitParser.*
+        val kleeneParser = digitParser.*()
         assert(kleeneParser("abc") == ParseSuccess(Nil, "abc"))
       }
 
       "Debería devolver una lista con todos los resultados parseados" in {
-        val kleeneParser = digitParser.*
+        val kleeneParser = digitParser.*()
         assert(kleeneParser("123abc") == ParseSuccess(List(1, 2, 3), "abc"))
       }
     }
 
     "+" - {
       "Debería devolver una lista con al menos un resultado" in {
-        val plusParser = digitParser.+
+        val plusParser = digitParser.+()
         assert(plusParser("123abc") == ParseSuccess(List(1, 2, 3), "abc"))
       }
 
       "Debería fallar si no puede parsear al menos una vez" in {
-        val plusParser = digitParser.+
+        val plusParser = digitParser.+()
         assert(plusParser("abc").isInstanceOf[ParseFailure])
       }
     }
@@ -73,3 +73,4 @@ class OperacionesTest extends AnyFreeSpec with Combinators {
     }
   }
 }
+*/

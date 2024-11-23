@@ -1,8 +1,11 @@
 package parsers_combinators
 
+
+import parsers_combinators.Parser
 import parsers_combinators.dibujo._
 
-trait ImageParser extends BasicParsers with Combinators {
+
+trait ImageParser{
   // Parser para puntos
   private val punto: Parser[Punto] = (double <~ char('@')) <> double map {
     case (x, y) => Punto(x, y)

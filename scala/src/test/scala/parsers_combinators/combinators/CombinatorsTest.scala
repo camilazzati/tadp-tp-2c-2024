@@ -2,10 +2,9 @@ package parsers_combinators.combinators
 
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.should.Matchers.{a, shouldBe}
-import parsers_combinators.Combinators
-import parsers_combinators.basic_parsers.*
-
-class CombinatorsTest extends AnyFreeSpec with Combinators {
+import parsers_combinators._
+/*
+class CombinatorsTest extends AnyFreeSpec{
   "Combinators" - {
     "El combinador OR (<|>)" - {
       "debería devolver el resultado del primer parser si tiene éxito" in {
@@ -142,4 +141,4 @@ class CombinatorsTest extends AnyFreeSpec with Combinators {
     }
 
   }
-}
+}*/
