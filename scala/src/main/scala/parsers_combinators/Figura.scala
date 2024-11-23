@@ -1,4 +1,4 @@
-package parsers_combinators.dibujo
+package parsers_combinators
 
 
 trait Figura
