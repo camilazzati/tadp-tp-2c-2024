@@ -67,7 +67,7 @@ abstract class Parser[+T]{
   // sepBy: parsea 0 o más veces el parser de contenido separado por el parser separador
   // Retorno: Retonar una Lista con los parseos
   def sepBy[U](parser2: Parser[U]): Parser[List[T]] = input =>
-      (this <~ parser2.opt()).*()(input) match {
+      (this <~ parser2.opt()).+()(input) match {
         case Success(ParseSuccess(result, resto)) => Success(ParseSuccess(result, resto))
         case Failure(_) => Failure(CombinatorsException("Falla el combinator"))
       }
