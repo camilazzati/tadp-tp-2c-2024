@@ -1,7 +1,11 @@
 package parsers_combinators
 
+import parsers_combinators.ASTInterpreter.interpretarFigura
 import tadp.drawing.TADPDrawingAdapter
-import parsers_combinators.dibujo._
+import parsers_combinators.Figura
+import parsers_combinators.ImageParser
+import parsers_combinators.Combinators
+import parsers_combinators.BasicParsers
 
 object ASTInterpreter {
 
@@ -25,7 +29,7 @@ object ASTInterpreter {
       figuras.foldLeft(adapter)((currentAdapter, figura) => interpretarFigura(figura, currentAdapter))
 
     case Color(r, g, b, figura) =>
-      val colorAdapter = adapter.beginColor(scalafx.scene.paint.Color.rgb(r, g, b)) // Interferencia con Nuestro Color
+      val colorAdapter = adapter.beginColor(scalafx.scene.paint.Color.rgb(r, g, b)) // Tuve que recurrir a esto
       val resultAdapter = interpretarFigura(figura, colorAdapter)
       resultAdapter.end()
 
@@ -65,12 +69,22 @@ object ASTInterpreter {
 
       case "interactive" =>
         TADPDrawingAdapter.forInteractiveScreen { (input, adapter) =>
-          val parsedFigura = ??? // TODO
-          interpretarFigura(parsedFigura, adapter)
+          Interactive(input, adapter).execute()
         }
 
       case _ =>
         throw new IllegalArgumentException("Tipo de salida no válido o parámetros insuficientes.")
     }
+  }
+}
+
+case class Interactive(input: String, adapter: TADPDrawingAdapter) extends BasicParsers with ImageParser {
+  def execute(): Unit = {
+    val parsedFigura = descripcionImagen(input) match {
+      case ParseSuccess(result, _) => result
+      case ParseFailure(message) =>
+        throw new IllegalArgumentException(s"Error al interpretar el input: $message")
+    }
+    interpretarFigura(parsedFigura, adapter)
   }
 }
