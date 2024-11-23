@@ -1,131 +1,129 @@
 package parsers_combinators
 
-trait Combinators extends BasicParsers {
+
+import scala.util.{Failure, Success, Try}
+import parsers_combinators._
+
+import scala.annotation.tailrec
+
+class CombinatorsException(message: String) extends Exception(message)
+case class ParseSuccess[+T](result: T, resto: String)
+
+abstract class Parser[+T]{
+
+  def apply(input: String): Try[ParseSuccess[T]]
+
+
   // OR Combinator: intenta con el primer parser, si falla, usa el segundo
-  // Sintaxis: Parser1 <|> Parser2
-  implicit class OrCombinator[T](parser1: Parser[T]) {
+  // Sintaxis: Parser1 <|> Parser2{
     // Con esta definición contemplamos que contengan un supertipo en comun
     // Ejemplo: parseInt <|> parseDouble
-    def <|>[U >: T](parser2: Parser[U]): Parser[U] = input =>
-      parser1(input) match {
-        case success: ParseSuccess[T] => success
-        case _: ParseFailure => parser2(input)
-      }
-  }
+  def <|>[U >: T](parser2: Parser[U]): Parser[U] = input =>
+       this.apply(input) match {
+         case Success(success) => Success(success)
+         case Failure(_) => parser2.apply(input)
+       }
+
 
   // Concat Combinator: secuencia dos parsers, devolviendo los resultados como una tupla
   // Sintaxis: Parser1 <> Parser2
-  implicit class ConcatCombinator[T](parser1: Parser[T]) {
-    // rest: resto
-    def <>[U](parser2: Parser[U]): Parser[(T, U)] = input =>
-      parser1(input) match {
-        case ParseSuccess(result1, rest1) =>
-          parser2(rest1) match {
-            case ParseSuccess(result2, rest2) => ParseSuccess((result1, result2), rest2)
-            case failure: ParseFailure => failure
-          }
-        case failure: ParseFailure => failure
-      }
-  }
+  // rest: resto
+   def <>[U](parser2: Parser[U]): Parser[(T, U)] = input =>
+       this.apply(input) match {
+         case Success(ParseSuccess(result1, rest1)) => parser2.apply(rest1) match {
+             case Success(ParseSuccess(result2, rest2)) => Success(ParseSuccess((result1, result2), rest2))
+             case Failure(_) => Failure(new CombinatorsException("Falla segundo parser"))
+           // lo envuelve en un Failure de Try
+           }
+         case Failure(_) => Failure(new CombinatorsException("Falla primer parser"))
+       }
 
   // Rightmost Combinator: ejecuta dos parsers y devuelve el resultado del segundo
   // Sintaxis: (primerParser ~> segundoParser)
-  implicit class RightmostCombinator[T](parser1: Parser[T]) {
-    def ~>[U](parser2: Parser[U]): Parser[U] = input =>
-      parser1(input) match {
-        case ParseSuccess(_, rest1) => parser2(rest1)
-        case failure: ParseFailure => failure
-      }
-  }
+  def ~>[U](parser2: Parser[U]): Parser[U] = input =>
+     this.apply(input) match {
+       case Success(ParseSuccess(_, rest1)) => parser2.apply(rest1)
+       case Failure(_) => Failure(new CombinatorsException("Falla primer parser"))
+     }
 
   // Leftmost Combinator: ejecuta dos parsers y devuelve el resultado del primero
   // Sintaxis: (primerParser <~ segundoParser)
-  implicit class LeftmostCombinator[T](parser1: Parser[T]) {
     // Basicamente lo que hace es (marea bastante):
     // * Verifica que devuelva solo el resultado del primer parser.
     // * Comprueba que falla si el primer o segundo parser fallan.
     // * Parsea lo primero y despues parsea lo segundo pero deja como
     // resultado el primero y luego el resto del segundo
-    def <~[U](parser2: Parser[U]): Parser[T] = input =>
-      parser1(input) match {
-        case ParseSuccess(result1, rest1) =>
-          parser2(rest1) match {
-            case ParseSuccess(_, rest2) => ParseSuccess(result1, rest2)
-            case failure: ParseFailure => failure
-          }
-        case failure: ParseFailure => failure
-      }
-  }
+  def <~[U](parser2: Parser[U]): Parser[T] = input =>
+     this.apply(input) match {
+       case Success(ParseSuccess(result1, rest1)) =>
+         parser2.apply(rest1) match {
+           case Success(ParseSuccess(_, rest2)) => Success(ParseSuccess(result1, rest2))
+           case Failure(_) => Failure(new CombinatorsException("Falla en el segundo parser"))
+         }
+       case Failure(_) => Failure(new CombinatorsException("Falla en el primer parser"))
+     }
 
   // Parser[List[T]]: parser contenido, parser separador, parser contenido, ...
   // sepBy: parsea 0 o más veces el parser de contenido separado por el parser separador
   // Retorno: Retonar una Lista con los parseos
-  implicit class SeparatedByCombinator[T](parser1: Parser[T]) {
-    def sepBy[U](parser2: Parser[U]): Parser[List[T]] = input =>
-      (parser1 <~ parser2.opt).*(input) match {
-        case ParseSuccess(result, resto) => ParseSuccess(result, resto)
-        case failure: ParseFailure => failure
+  def sepBy[U](parser2: Parser[U]): Parser[List[T]] = input =>
+      (this <~ parser2.opt()).+()(input) match {
+        case Success(ParseSuccess(result, resto)) => Success(ParseSuccess(result, resto))
+        case Failure(_) => Failure(CombinatorsException("Falla el combinator"))
       }
+
+  def satisfies(condicion: T => Boolean): Parser[T] = input =>
+    this.apply(input) match {
+      // parsea y cumple condicion
+      case Success(ParseSuccess(result, resto)) if condicion(result) => Success(ParseSuccess(result, resto))
+      // parsea pero no cumple condicion
+      case Success(ParseSuccess(_, _)) => Failure(CombinatorsException("Parsea pero no cumple la condicion"))
+      // no parsea
+      case Failure(_) => Failure(CombinatorsException("No parsea"))
+    }
+
+  // si el parser es exitoso lo aplica
+  // si falla el resultado no contiene ningun valor y no consume ningun caracter
+  def opt(): Parser[Option[T]] = input =>
+    this.apply(input) match {
+      // envuelvo el result en Some para que el tipo coincida con Option
+      case Success(ParseSuccess(result, resto)) => Success(ParseSuccess(Some(result), resto))
+      case Failure(_) => Success(ParseSuccess(None, input))
+    }
+
+  def *(): Parser[List[T]] = input => {
+    def parserRecursivo(input: String, resultadosAcumulados: List[T]): Try[ParseSuccess[List[T]]] =
+      this.apply(input) match {
+        // el parser es exitoso, agrega el resultado al acumulador y vuelve a llamar recursivamente
+        case Success(ParseSuccess(result, resto)) => parserRecursivo(resto, resultadosAcumulados :+ result)
+        // el parser no es exitoso, devuelve el valor acumulado con el resto
+        // si llegara a fallar en el primer recorrido, resultadosAcumulados estaria vacío y el input sería el del comienzo, asi que es tambien el caso base
+        case Failure(_) => Success(ParseSuccess(resultadosAcumulados, input))
+      }
+    parserRecursivo(input, List.empty)
   }
+
+  // * pero se tiene que aplicar al menos 1 vez
+  // puedo usar * y satisfies para que se fije que el resultado de * tenga algo como para asegurarse de que se parseo al menos una vez
+  def +(): Parser[List[T]] = input => {
+    val kleeneParser = this.*()
+    kleeneParser.satisfies(_.nonEmpty)(input) match {
+      case Success(ParseSuccess(result, resto)) => Success(ParseSuccess(result, resto))
+      case Failure(_) => Failure(CombinatorsException("No parseo al menos una vez"))
+    }
+  }
+
+  // parsea
+  // convierte el valor parseado utilizando la función
+  def map[U](f: T => U): Parser[U] = input =>
+    this.apply(input) match {
+      case Success(ParseSuccess(resultOriginal, resto)) => Success(ParseSuccess(f(resultOriginal), resto))
+      case Failure(_) => Failure(CombinatorsException("Fallo el parser"))
+    }
   
-  // ------------ OPERACIONES -------------
 
-  implicit class Operaciones[T](parser: Parser[T]) {
-    // recibe un parser y una condicion, tiene que cumplir las dos cosas
-    def satisfies(condicion: T => Boolean): Parser[T] = input =>
-      parser(input) match {
-        // parsea y cumple condicion
-        case ParseSuccess(result, resto) if condicion(result) => ParseSuccess(result, resto)
-        // parsea pero no cumple condicion
-        case ParseSuccess(_, _) => ParseFailure("El elemento parseado no cumple la condición")
-        // no parsea
-        case failure: ParseFailure => ParseFailure("El elemento no parsea")
-      }
-
-
-    // si el parser es exitoso lo aplica
-    // si falla el resultado no contiene ningun valor y no consume ningun caracter
-    def opt: Parser[Option[T]] = input => {
-      parser(input) match {
-        // envuelvo el result en Some para que el tipo coincida con Option
-        case ParseSuccess(result, resto) => ParseSuccess(Some(result), resto)
-        case failure: ParseFailure => ParseSuccess(None, input)
-      }
-    }
-
-
-    def * : Parser[List[T]] = input => {
-      def parserRecursivo(input: String, resultadosAcumulados: List[T]): ParseSuccess[List[T]] =
-        parser(input) match {
-          // el parser es exitoso, agrega el resultado al acumulador y vuelve a llamar recursivamente
-          case ParseSuccess(result, resto) => parserRecursivo(resto, resultadosAcumulados :+ result)
-          // el parser no es exitoso, devuelve el valor acumulado con el resto
-          // si llegara a fallar en el primer recorrido, resultadosAcumulados estaria vacío y el input sería el del comienzo, asi que es tambien el caso base
-          case failure: ParseFailure => ParseSuccess(resultadosAcumulados, input)
-        }
-
-      parserRecursivo(input, List.empty)
-    }
-    
-    // * pero se tiene que aplicar al menos 1 vez
-    // puedo usar * y satisfies para que se fije que el resultado de * tenga algo como para asegurarse de que se parseo al menos una vez
-    def + : Parser[List[T]] = input => {
-      val kleeneParser = parser.*
-      //TODO: No se si te falta revisar esto
-      kleeneParser.satisfies(_.nonEmpty)(input) match {
-            case ParseSuccess(result, resto) => ParseSuccess(result, resto)
-            case failure: ParseFailure => ParseFailure("No se pudo aplicar al menos 1 vez el parser")
-          }
-    }
-
-    // parsea
-    // convierte el valor parseado utilizando la función
-    def map[U](f: T => U): Parser[U] = input => {
-      parser(input) match {
-        case ParseSuccess(resultOriginal, resto) => ParseSuccess(f(resultOriginal), resto)
-        case failure: ParseFailure => failure
-      }
-    }
-  }
 }
+
+   
+
 
