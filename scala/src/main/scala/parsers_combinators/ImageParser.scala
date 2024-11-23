@@ -74,7 +74,7 @@ object SimplificadorTransformacion {
     case Color(_, _, _,Color(r, g, b, fig)) => simplificar(Color(r, g, b, fig))
 
     case Rotacion(angulo1, Rotacion(angulo2, fig)) =>
-      simplificar(Rotacion((angulo1 + angulo2) % 360.0, fig))
+      simplificar(Rotacion(normalizarAngulo(angulo1 + angulo2), fig))
 
     case Escala(sx1, sy1, Escala(sx2, sy2, fig)) =>
       simplificar(Escala(sx1 * sx2, sy1 * sy2, fig))
@@ -89,7 +89,7 @@ object SimplificadorTransformacion {
     case Grupo(figuras) => simplificarGrupo(figuras)
 
     case Color(r, g, b, fig) => Color(r, g, b, simplificar(fig))
-    case Rotacion(angulo, fig) if angulo > 359 => Rotacion(angulo % 360, simplificar(fig))
+    case Rotacion(angulo, fig) => Rotacion(normalizarAngulo(angulo), simplificar(fig))
     case Escala(sx, sy, fig) => Escala(sx, sy, simplificar(fig))
     case Traslacion(dx, dy, fig) => Traslacion(dx, dy, simplificar(fig))
 
@@ -116,4 +116,7 @@ object SimplificadorTransformacion {
       case _ => Grupo(figurasSimplificadas)
     }
   }
+  
+  // por si es negativo o mayor a 359, que este entre el rango [0, 360)
+  private def normalizarAngulo(angulo: Double): Double = ((angulo % 360) + 360) % 360
 }
