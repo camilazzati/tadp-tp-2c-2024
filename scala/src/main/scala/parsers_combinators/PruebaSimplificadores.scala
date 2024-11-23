@@ -1,6 +1,6 @@
 package parsers_combinators
 
-import parsers_combinators.dibujo._
+import parsers_combinators.Figura
 
 object SimplificacionTests extends App {
 
