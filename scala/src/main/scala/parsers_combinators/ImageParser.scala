@@ -1,6 +1,6 @@
 package parsers_combinators
 
-import parsers_combinators.dibujo._
+import parsers_combinators.Figura
 
 trait ImageParser extends BasicParsers with Combinators {
   // Parser para puntos
