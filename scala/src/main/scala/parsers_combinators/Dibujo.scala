@@ -4,8 +4,8 @@ import parsers_combinators.ASTInterpreter.interpretarFigura
 import tadp.drawing.TADPDrawingAdapter
 import parsers_combinators.Figura
 import parsers_combinators.ImageParser
-import parsers_combinators.Combinators
-import parsers_combinators.BasicParsers
+import parsers_combinators.ParseSuccess
+
 
 object ASTInterpreter {
 
@@ -78,7 +78,7 @@ object ASTInterpreter {
   }
 }
 
-case class Interactive(input: String, adapter: TADPDrawingAdapter) extends BasicParsers with ImageParser {
+case class Interactive(input: String, adapter: TADPDrawingAdapter){
   def execute(): Unit = {
     val parsedFigura = descripcionImagen(input) match {
       case ParseSuccess(result, _) => result
