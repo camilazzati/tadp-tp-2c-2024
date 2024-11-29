@@ -5,6 +5,8 @@ import tadp.drawing.TADPDrawingAdapter
 import parsers_combinators.Figura
 import parsers_combinators.ImageParser
 import parsers_combinators.ParseSuccess
+import parsers_combinators.PruebaImageParser.descripcionImagen
+import scala.util.{Failure, Success}
 
 
 object ASTInterpreter {
@@ -81,9 +83,9 @@ object ASTInterpreter {
 case class Interactive(input: String, adapter: TADPDrawingAdapter){
   def execute(): Unit = {
     val parsedFigura = descripcionImagen(input) match {
-      case ParseSuccess(result, _) => result
-      case ParseFailure(message) =>
-        throw new IllegalArgumentException(s"Error al interpretar el input: $message")
+      case Success(ParseSuccess(result, _)) => result
+      case Failure(_) =>
+        throw new IllegalArgumentException(s"Error al interpretar el input")
     }
     interpretarFigura(parsedFigura, adapter)
   }

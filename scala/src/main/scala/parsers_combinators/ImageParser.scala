@@ -25,33 +25,36 @@ trait ImageParser {
       case (centro, radio) => Circulo(centro, radio)
     }
 
-  // Parser general para figuras
-  private val figura: Parser[Figura] = triangulo <|> rectangulo <|> circulo
-
   // Parser para grupos
   private val grupo: Parser[Grupo] =
     string("grupo(") ~> figura.sepBy(char(',')) <~ char(')') map Grupo
+
+  // Parser general para figuras
+  private val figura: Parser[Figura] = triangulo <|> rectangulo <|> circulo <|> grupo
 
   // Parsers para transformaciones
   private val color: Parser[Color] =
     string("color[") ~> (digit.sepBy(char(',')).map {
       case List(r, g, b) => (r, g, b)
-    } <> figura) <~ char(']') map {
+    } <> (char('(') ~> figura <~ char(')'))) <~ char(']') map {
       case ((rojo, verde, azul), fig) => Color(rojo, verde, azul, fig)
     }
 
   private val escala: Parser[Escala] =
-    string("escala[") ~> (double <> (char(',') ~> double) <> figura) <~ char(']') map {
+    string("escala[") ~> (double <> (char(',') ~> double)
+      <> (char('(') ~> figura <~ char(')'))) <~ char(']') map {
       case ((sx, sy), fig) => Escala(sx, sy, fig)
     }
 
   private val rotacion: Parser[Rotacion] =
-    string("rotacion[") ~> double <~ char(']') <> figura map {
+    string("rotacion[") ~> double <~ char(']')
+      <> (char('(') ~> figura <~ char(')')) map {
       case (angulo, fig) => Rotacion(angulo % 360, fig)
     }
 
   private val traslacion: Parser[Traslacion] =
-    string("traslacion[") ~> (double <> (char(',') ~> double) <> figura) <~ char(']') map {
+    string("traslacion[") ~> (double <> (char(',') ~> double)
+      <> (char('(') ~> figura <~ char(')'))) <~ char(']') map {
       case ((dx, dy), fig) => Traslacion(dx, dy, fig)
     }
 
@@ -69,10 +72,10 @@ trait ImageParser {
 
 object SimplificadorTransformacion {
   def simplificar(figura: Figura): Figura = figura match {
-    case Color(_, _, _,Color(r, g, b, fig)) => simplificar(Color(r, g, b, fig))
+    case Color(_, _, _, Color(r, g, b, fig)) => simplificar(Color(r, g, b, fig))
 
     case Rotacion(angulo1, Rotacion(angulo2, fig)) =>
-      simplificar(Rotacion((angulo1 + angulo2) % 360.0, fig))
+      simplificar(Rotacion(normalizarAngulo(angulo1 + angulo2), fig))
 
     case Escala(sx1, sy1, Escala(sx2, sy2, fig)) =>
       simplificar(Escala(sx1 * sx2, sy1 * sy2, fig))
@@ -87,7 +90,7 @@ object SimplificadorTransformacion {
     case Grupo(figuras) => simplificarGrupo(figuras)
 
     case Color(r, g, b, fig) => Color(r, g, b, simplificar(fig))
-    case Rotacion(angulo, fig) if angulo > 359 => Rotacion(angulo % 360, simplificar(fig))
+    case Rotacion(angulo, fig) => Rotacion(normalizarAngulo(angulo), simplificar(fig))
     case Escala(sx, sy, fig) => Escala(sx, sy, simplificar(fig))
     case Traslacion(dx, dy, fig) => Traslacion(dx, dy, simplificar(fig))
 
@@ -114,4 +117,7 @@ object SimplificadorTransformacion {
       case _ => Grupo(figurasSimplificadas)
     }
   }
+  
+  // por si es negativo o mayor a 359, que este entre el rango [0, 360)
+  private def normalizarAngulo(angulo: Double): Double = ((angulo % 360) + 360) % 360
 }
