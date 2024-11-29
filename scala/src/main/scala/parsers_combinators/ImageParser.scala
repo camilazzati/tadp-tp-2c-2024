@@ -69,7 +69,7 @@ trait ImageParser {
 
 object SimplificadorTransformacion {
   def simplificar(figura: Figura): Figura = figura match {
-    case Color(_, _, _,Color(r, g, b, fig)) => simplificar(Color(r, g, b, fig))
+    case Color(_, _, _, Color(r, g, b, fig)) => simplificar(Color(r, g, b, fig))
 
     case Rotacion(angulo1, Rotacion(angulo2, fig)) =>
       simplificar(Rotacion(normalizarAngulo(angulo1 + angulo2), fig))
