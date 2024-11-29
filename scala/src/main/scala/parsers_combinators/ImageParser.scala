@@ -25,33 +25,36 @@ trait ImageParser {
       case (centro, radio) => Circulo(centro, radio)
     }
 
-  // Parser general para figuras
-  private val figura: Parser[Figura] = triangulo <|> rectangulo <|> circulo
-
   // Parser para grupos
   private val grupo: Parser[Grupo] =
     string("grupo(") ~> figura.sepBy(char(',')) <~ char(')') map Grupo
+
+  // Parser general para figuras
+  private val figura: Parser[Figura] = triangulo <|> rectangulo <|> circulo <|> grupo
 
   // Parsers para transformaciones
   private val color: Parser[Color] =
     string("color[") ~> (digit.sepBy(char(',')).map {
       case List(r, g, b) => (r, g, b)
-    } <> figura) <~ char(']') map {
+    } <> (char('(') ~> figura <~ char(')'))) <~ char(']') map {
       case ((rojo, verde, azul), fig) => Color(rojo, verde, azul, fig)
     }
 
   private val escala: Parser[Escala] =
-    string("escala[") ~> (double <> (char(',') ~> double) <> figura) <~ char(']') map {
+    string("escala[") ~> (double <> (char(',') ~> double)
+      <> (char('(') ~> figura <~ char(')'))) <~ char(']') map {
       case ((sx, sy), fig) => Escala(sx, sy, fig)
     }
 
   private val rotacion: Parser[Rotacion] =
-    string("rotacion[") ~> double <~ char(']') <> figura map {
+    string("rotacion[") ~> double <~ char(']')
+      <> (char('(') ~> figura <~ char(')')) map {
       case (angulo, fig) => Rotacion(angulo % 360, fig)
     }
 
   private val traslacion: Parser[Traslacion] =
-    string("traslacion[") ~> (double <> (char(',') ~> double) <> figura) <~ char(']') map {
+    string("traslacion[") ~> (double <> (char(',') ~> double)
+      <> (char('(') ~> figura <~ char(')'))) <~ char(']') map {
       case ((dx, dy), fig) => Traslacion(dx, dy, fig)
     }
 
