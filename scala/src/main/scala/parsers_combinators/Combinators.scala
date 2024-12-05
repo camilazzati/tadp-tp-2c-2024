@@ -127,7 +127,7 @@ abstract class Parser[+T]{
     def parserRecursivo(input: String, resultadosAcumulados: List[T], cabtidad: Int, cantVecesParseado: Int): Try[ParseSuccess[List[T]]] =
       this.apply(input) match {
         // el parser es exitoso y le falta repetir más veces, agrega el resultado al acumulador y vuelve a llamar recursivamente
-        case Success(ParseSuccess(result, resto)) if cantVecesParseado < cantidad => parserRecursivo(resto, resultadosAcumulados :+ result, cantidad, cantVecesParceado + 1)
+        case Success(ParseSuccess(result, resto)) if cantVecesParseado < cantidad => parserRecursivo(resto, resultadosAcumulados :+ result, cantidad, cantVecesParseado + 1)
         // el parser es exitoso y ya es la ultima vez que tenia que repetir
         case Success(ParseSuccess(result, resto)) => Success(ParseSuccess(resultadosAcumulados, input))
         // el parser no es exitoso, devuelve el valor acumulado con el resto
