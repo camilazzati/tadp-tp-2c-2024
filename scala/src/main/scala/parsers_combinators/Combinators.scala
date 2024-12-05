@@ -120,8 +120,22 @@ abstract class Parser[+T]{
       case Success(ParseSuccess(resultOriginal, resto)) => Success(ParseSuccess(f(resultOriginal), resto))
       case Failure(_) => Failure(CombinatorsException("Fallo el parser"))
     }
-  
 
+
+  // TP INDIVIDUAL (me saque un 10 pero me puso como correccion que podria no desconstruir el Try y usar su interface
+  def repetir(cantidad: Int): Parser[List[T]] = input => {
+    def parserRecursivo(input: String, resultadosAcumulados: List[T], cabtidad: Int, cantVecesParseado: Int): Try[ParseSuccess[List[T]]] =
+      this.apply(input) match {
+        // el parser es exitoso y le falta repetir más veces, agrega el resultado al acumulador y vuelve a llamar recursivamente
+        case Success(ParseSuccess(result, resto)) if cantVecesParseado < cantidad => parserRecursivo(resto, resultadosAcumulados :+ result, cantidad, cantVecesParceado + 1)
+        // el parser es exitoso y ya es la ultima vez que tenia que repetir
+        case Success(ParseSuccess(result, resto)) => Success(ParseSuccess(resultadosAcumulados, input))
+        // el parser no es exitoso, devuelve el valor acumulado con el resto
+        // si llegara a fallar en el primer recorrido, resultadosAcumulados estaria vacío y el input sería el del comienzo, asi que es tambien el caso base
+        case Failure(_) => Failure(CombinatorsException("Fallo el parser"))
+      }
+    parserRecursivo(input, List.empty, cantidad, 1)
+  }
 }
 
    
