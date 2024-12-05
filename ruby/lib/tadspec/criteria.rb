@@ -116,6 +116,16 @@ module Criteria
     }
   end
 
+  # TP INDIVIDUAL (me saque un 10 pero me corriqui que doble parametro object podria llevar a errores inesperados y dificiles de encontrar, poner un mejor nombre)
+  def polimorfico_con(object)
+    mensajes_a_entender = object.methods(true)
+    Config.new(proc { |object|
+      mensajes_a_entender.all? { |mensaje|
+        object.respond_to?(mensaje)
+      }
+    })
+  end
+
   private
   def obtener_valor_variable(object, mensaje)
     variable = "@#{mensaje}"
